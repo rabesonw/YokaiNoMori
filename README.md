@@ -1,2 +1,2 @@
 # YokaiNoMori
-Fun game
+Fun game !
