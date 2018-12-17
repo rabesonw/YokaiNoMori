@@ -1,10 +1,10 @@
-import YokaiNoMoriTypes.joueurProtocol
+import YokaiNoMoriTypes
 
 public struct joueur : joueurProtocol {
-    private var nb
+    private var nb : Int
 
     // le nombre du joueur, en general c'est 1 ou 2
-    var nombre : Int{
+    public var nombre : Int{
       get {
         return self.nb
       }
@@ -12,7 +12,7 @@ public struct joueur : joueurProtocol {
 
     // creation d’un joueur, avec un nombre donne
     // init : Int -> Joueur
-    init(nombre : Int) {
+    public init(nombre : Int) {
       self.nb = nombre
     }
 }

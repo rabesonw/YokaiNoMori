@@ -1,6 +1,6 @@
 import Foundation
 
-protocol joueurProtocol {
+public protocol joueurProtocol {
 
 	// le nombre du joueur, en general c'est 1 ou 2
     var nombre : Int{get}
