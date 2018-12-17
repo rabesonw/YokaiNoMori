@@ -1,8 +1,9 @@
 import Foundation
 
 protocol collectionPositionsProtocol : Sequence {
-    associatedtype IteratorPositions : IteratorProtocol where IteratorPositions.Element == (Int, Int) // touple qui est (coordX, coordY)
 
+    associatedtype positionsIterateurProtocol : IteratorProtocol
+    
     // init : -> CollectionPositions
     // création d'une collection de positions
     init()
@@ -29,8 +30,18 @@ protocol collectionPositionsProtocol : Sequence {
 	@discardableResult
 	mutating func removePosition(x : Int, y: Int) -> Self
     
-	// makeIterator : collectionPositionsProtocol -> IteratorPositions
+	// makeIterator : collectionPositionsProtocol -> positionsIterateurProtocol
     // crée un itérateur sur le collection pour itérer avec for in.
-    func makeIterator() -> IteratorPositions
+    func makeIterator() -> positionsIterateurProtocol
+}
+
+protocol positionsIterateurProtocol : IteratorProtocol {
+
+    // next : IterateurPositionsProtocol -> PlateauProtocolIterator x (Int, Int)?
+    // renvoie la prochaine position (touple (coordX, coordY)) dans la collection du positions
+    // Pre :
+    // Post : retourne la position suivante dans la collection du positions, ou nil si on est au fin de la collection
+
+    func next() -> (Int, Int)?    
 }
 
