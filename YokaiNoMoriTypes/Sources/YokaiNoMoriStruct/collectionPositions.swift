@@ -1,10 +1,10 @@
 import YokaiNoMoriTypes
 
-public struct collectionPositions : collectionPositionsProtocol {
+public struct CollectionPositions : collectionPositionsProtocol {
 
 
   // Collecton de position : tableau de tuples d'Int
-  private var col : [(Int, Int)]
+  fileprivate var col : [(Int, Int)]
 
   // init : -> CollectionPositions
   // création d'une collection de positions
@@ -25,7 +25,7 @@ public struct collectionPositions : collectionPositionsProtocol {
   // Pre : le touple (x,y) n’est pas deja dans la collection
   // Post : la collection a le nouveau touple (x,y) si les preconditions ont été respectées, sinon, rien n'est changé.
   @discardableResult
-  public mutating func addPosition(x : Int, y: Int) -> collectionPositions {
+  public mutating func addPosition(x : Int, y: Int) -> CollectionPositions {
     if (x >= 1 && x <= 3) && (y >= 1 && y <= 4) {
       let tuple = (x,y)
       self.col.append(tuple)
@@ -40,7 +40,7 @@ public struct collectionPositions : collectionPositionsProtocol {
   // Pre : le touple (x,y) est dans la collection
   // Post : la collection avec le touple (x,y) efface si les preconditions ont été respectées, sinon, rien n'est changé.
   @discardableResult
-  public mutating func removePosition(x : Int, y: Int) -> collectionPositions {
+  public mutating func removePosition(x : Int, y: Int) -> CollectionPositions {
     if (x >= 1 && x <= 3) && (y >= 1 && y <= 4) {
       let tuple = (x,y)
       if let index = self.col.firstIndex(where: { $0 == tuple }) {
@@ -52,16 +52,19 @@ public struct collectionPositions : collectionPositionsProtocol {
 
   // makeIterator : collectionPositionsProtocol -> positionsIterateurProtocol
   // crée un itérateur sur le collection pour itérer avec for in.
-  public func makeIterator() -> positionsIterateur {
-    return positionsIterateur()
+  public func makeIterator() -> PositionsIterateur {
+    return PositionsIterateur(self)
 
   }
 }
 
-public struct positionsIterateur : positionsIterateurProtocol {
+public struct PositionsIterateur : positionsIterateurProtocol {
+    let c : CollectionPositions
+    var count : Int
 
-    public init() {
-
+    public init(_ c: CollectionPositions) {
+      self.c = c
+      self.count = 0
     }
 
     // next : IterateurPositionsProtocol -> PlateauProtocolIterator x (Int, Int)?
@@ -69,7 +72,12 @@ public struct positionsIterateur : positionsIterateurProtocol {
     // Pre :
     // Post : retourne la position suivante dans la collection du positions, ou nil si on est au fin de la collection
 
-    public func next() -> (Int, Int)? {
+    public mutating func next() -> (Int, Int)? {
+      if self.count < self.c.countPositions() {
+        let current = self.count
+        self.count += 1
+        return self.c.col[current]
+      }
       return nil
     }
 }

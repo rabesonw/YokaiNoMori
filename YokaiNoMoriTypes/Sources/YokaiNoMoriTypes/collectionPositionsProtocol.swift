@@ -42,5 +42,5 @@ public protocol positionsIterateurProtocol : IteratorProtocol {
     // Pre :
     // Post : retourne la position suivante dans la collection du positions, ou nil si on est au fin de la collection
 
-    func next() -> (Int, Int)?
+    mutating func next() -> (Int, Int)?
 }
