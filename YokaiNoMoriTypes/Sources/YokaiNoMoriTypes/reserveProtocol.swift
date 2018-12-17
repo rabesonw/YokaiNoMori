@@ -4,7 +4,7 @@ public protocol reserveProtocol : Sequence {
 
 	typealias Piece = pieceProtocol
 	typealias Joueur = joueurProtocol
-	associatedtype reserveIterateurProtocol : IteratorProtocol where reserveIterateurProtocol.Element == Piece
+	associatedtype reserveIterateurProtocol : IteratorProtocol //where reserveIterateurProtocol.Element == Piece
 
 	// init : -> reserveProtocol
 	// cree une reserve vide
@@ -39,9 +39,11 @@ public protocol reserveProtocol : Sequence {
 
 }
 
-protocol reserveIterateurProtocol : IteratorProtocol {
+public protocol reserveIterateurProtocol : IteratorProtocol {
 
 	typealias Piece = pieceProtocol
+
+	init(_ res: [Piece])
 
     // next : reserveIterateurProtocol -> reserveIterateurProtocol x pieceProtocol?
     // renvoie la prochaine piece dans la collection du Reserve
