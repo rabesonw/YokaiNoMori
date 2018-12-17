@@ -1,4 +1,4 @@
-YokaiNoMoriTypes.joueurProtocol
+import YokaiNoMoriTypes.joueurProtocol
 
 public struct joueur : joueurProtocol {
     private var nb

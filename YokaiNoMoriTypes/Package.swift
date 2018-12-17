@@ -10,6 +10,9 @@ let package = Package(
         .library(
             name: "YokaiNoMoriTypes",
             targets: ["YokaiNoMoriTypes"]),
+	.library(
+            name: "YokaiNoMoriStruct",
+            targets: ["YokaiNoMoriStruct"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -21,6 +24,9 @@ let package = Package(
         .target(
             name: "YokaiNoMoriTypes",
             dependencies: []),
+	.target(
+            name: "YokaiNoMoriStruct",
+            dependencies: ["YokaiNoMoriTypes"]),
         .testTarget(
             name: "YokaiNoMoriTypesTests",
             dependencies: ["YokaiNoMoriTypes"]),
