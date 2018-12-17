@@ -1,6 +1,6 @@
 import Foundation
 
-protocol tableDeJeuProtocol : Sequence {
+public protocol tableDeJeuProtocol : Sequence {
 
     typealias Piece = pieceProtocol
     typealias Joueur = joueurProtocol

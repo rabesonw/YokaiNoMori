@@ -1,6 +1,6 @@
 import Foundation
 
-protocol reserveProtocol : Sequence {
+public protocol reserveProtocol : Sequence {
 
 	typealias Piece = pieceProtocol
 	typealias Joueur = joueurProtocol

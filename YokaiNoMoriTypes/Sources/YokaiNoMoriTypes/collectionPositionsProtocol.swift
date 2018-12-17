@@ -1,6 +1,6 @@
 import Foundation
 
-protocol collectionPositionsProtocol : Sequence {
+public protocol collectionPositionsProtocol : Sequence {
 
     associatedtype positionsIterateurProtocol : IteratorProtocol
     

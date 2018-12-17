@@ -1,6 +1,6 @@
 import Foundation
 
-protocol pieceProtocol {
+public protocol pieceProtocol {
     typealias Piece = pieceProtocol
     typealias Joueur = joueurProtocol
 
