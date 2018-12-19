@@ -1,17 +1,65 @@
 import Foundation
+import YokaiNoMoriTypes
+
+public typealias JoueurT = YokaiNoMoriStruct.Joueur
+public typealias PieceT = YokaiNoMoriStruct.Piece
+public typealias ReserveT = YokaiNoMoriStruct.Reserve
+
 
 public struct TableDeJeu : tableDeJeuProtocol {
+  private var tab : [[PieceT?]]
 
-	public var joueur1 : Joueur{get set}
-	public var joueur2 : Joueur{get set}
+  private var r1 : ReserveT // Reserve du j1
+  private var r2 : ReserveT // Reserve du j2
 
-  public var reserve1 : Reserve{get}
-  public var reserve2 : Reserve{get}
+	public var joueur1 : JoueurT
+	public var joueur2 : JoueurT
+
+  public var reserve1 : ReserveT {
+    get {
+      return self.r1
+    }
+  }
+
+  public var reserve2 : ReserveT {
+    get {
+      return self.r2
+    }
+  }
+
 
 	// init : -> tableDeJeu
 	// creation d’une table de jeu: on initialise la table de jeu, les 2 joueurs, les 2 reserves vides
     // et apres, les 8 pieces
 	public init() {
+    var a = JoueurT(nombre : 2)
+    // Init du tableau
+
+    // Cree un tableau de 4 lignes (y) et 3 colonnes (x)
+    self.tab = Array(repeating: Array(repeating: nil, count: 4), count: 3)
+
+    // Creation des joueurs
+    self.joueur1 = JoueurT(nombre: 1)
+    self.joueur2 = JoueurT(nombre: 2)
+
+    // Creation des reserves vides
+    self.r1 = ReserveT()
+    self.r2 = ReserveT()
+
+    // Creation des 8 pieces
+    // Note : Prendre en compte que coorX est a l'indice coordX-1 et coordY est a l'indice coordY-1 dans le tableau
+    // Pieces du J1
+    self.tab[0][0] = PieceT (nom: "tanuki", coordX: 1, coordY: 1, joueur: self.joueur1)
+    self.tab[1][0] = PieceT (nom: "koropokkuru", coordX: 2, coordY: 1, joueur: self.joueur1)
+    self.tab[1][1] = PieceT (nom: "kodama", coordX: 2, coordY: 2, joueur: self.joueur1)
+    self.tab[2][0] = PieceT (nom: "kitsune", coordX: 3, coordY: 1, joueur: self.joueur1)
+
+    // Pieces du J2
+    self.tab[2][3] = YokaiNoMoriStruct.Piece (nom: "tanuki", coordX: 3, coordY: 4, joueur: self.joueur2)
+    self.tab[1][3] = PieceT (nom: "koropokkuru", coordX: 2, coordY: 4, joueur: self.joueur2)
+    self.tab[1][2] = PieceT (nom: "kodama", coordX: 2, coordY: 3, joueur: self.joueur2)
+    self.tab[0][3] = PieceT (nom: "kitsune", coordX: 1, coordY: 4, joueur: self.joueur2)
+
 
   }
 
@@ -21,7 +69,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	// 		1 <= coordX <= 3 , 1 <= coordY <= 4
 	// Pre : la piece existe sur le table de Jeu
 	// Post : la piece cherche si les preconditions sont respectees, sinon retourne Vide
-	public func searchPiecePosition(_ coordX : Int,_  coordY : Int) -> Piece? {
+	public func searchPiecePosition(_ coordX : Int,_  coordY : Int) -> PieceT? {
 
   }
 
@@ -39,7 +87,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	//		la case (neufX, neufY) est vide
 	//		1 <= x <= 3 et 1 <= y <=4.
 	//		renvoie False sinon.
-	public func validerDeplacement(_ Piece : Piece, _ neufX : Int, _ neufY : Int) -> Bool {
+	public func validerDeplacement(_ Piece : PieceT, _ neufX : Int, _ neufY : Int) -> Bool {
 
   }
 
@@ -52,7 +100,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	//		la case (neufX, neufY) est occupee par une piece ennemie
 	//		1 <= x <= 3 et 1 <= y <=4.
 	//		renvoie False sinon.
-	public func validerCapture(_ Piece : Piece, _ neufX : Int, _ neufY : Int) -> Bool {
+	public func validerCapture(_ Piece : PieceT, _ neufX : Int, _ neufY : Int) -> Bool {
 
   }
 
@@ -65,7 +113,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	//		Apres on deplace la piece, on verifie si on doit la promouvoir, en appelant
 	//		estEnPromotion(piece) pour verifier, et transformerKodama(piece) pour la transformer.
 	@discardableResult
-	public mutating func deplacerPiece(_ Piece: Piece, _ neufX : Int, _ neufY : Int) -> TableDeJeu {
+	public mutating func deplacerPiece(_ Piece: PieceT, _ neufX : Int, _ neufY : Int) -> TableDeJeu {
 
   }
 
@@ -75,7 +123,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	// Post : si les preconditions sont satisfaites, les deux Pieces changent leurs positions
 	//	et la pièce capturee est dans la reserve de le joueur attaquant . Sinon, l’etat de la table de jeu reste le meme.
 	@discardableResult
-	public mutating func capturerPiece(_ pieceAttaquante : Piece, _ neufX : Int, _ neufY : Int) -> SelTableDeJeu {
+	public mutating func capturerPiece(_ pieceAttaquante : PieceT, _ neufX : Int, _ neufY : Int) -> TableDeJeu {
 
   }
 
@@ -88,7 +136,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	// Post : la nouvelle Piece est au même emplacement mais est un kodama samourai
 	//        ou c'est un kodama dans la reserve de l'attaquant
 	@discardableResult
-	public mutating func transformerKodama(_ piece : Piece) throws -> TableDeJeu {
+	public mutating func transformerKodama(_ piece : PieceT) throws -> TableDeJeu {
 
   }
 
@@ -97,7 +145,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
     // Pre : la pièce est sur la table de jeu (contre-exemple : etre deja en reserve)
     // Post : la Piece est en reserve et son joueur est changé
 	@discardableResult
-	public mutating func mettreEnReserve(_ piece : Piece) -> TableDeJeu {
+	public mutating func mettreEnReserve(_ piece : PieceT) -> TableDeJeu {
 
   }
 
@@ -108,7 +156,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
     // Pre : la neuf case est libre avant parachuter
     // Post : si les preconditions sont respectees, l’etat de la pièce est change
 	@discardableResult
-  public mutating func parachuter(_ piece : Piece, _ neufX : Int, _ neufY : Int) throws -> TableDeJeu {
+  public mutating func parachuter(_ piece : PieceT, _ neufX : Int, _ neufY : Int) throws -> TableDeJeu {
 
   }
 
@@ -116,13 +164,15 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	// verifie si la partie est gagnée par le joueur indique par le parametre
 	// Pre : aucune
 	// Post : renvoie true si le jouer donne a gagne, false sinon
-  public func gagnerPartie(_ joueur : Joueur) -> TableDeJeu {
+  public func gagnerPartie(_ joueur : JoueurT) -> TableDeJeu {
 
   }
 
 	// makeIterator : tableDeJeuProtocol -> tableDeJeuIterateurProtocol
     // crée un itérateur sur le collection pour itérer avec for in.
-  public func makeIterator() -> TableDeJeuIterateur
+  public func makeIterator() -> TableDeJeuIterateur {
+
+  }
 
 }
 
@@ -137,7 +187,7 @@ public struct TableDeJeuIterateur : tableDeJeuIterateurProtocol {
     // Pre : aucune
     // Post : retourne la piece suivante dans la collection du tableDeJeu, ou nil si on est au fin de la collection
 
-	public func next() -> Piece? {
+	public func next() -> PieceT? {
 
   }
 

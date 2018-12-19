@@ -1,6 +1,6 @@
 import YokaiNoMoriTypes
 
-public struct joueur : joueurProtocol {
+public struct Joueur : joueurProtocol {
     private var nb : Int
 
     // le nombre du joueur, en general c'est 1 ou 2
