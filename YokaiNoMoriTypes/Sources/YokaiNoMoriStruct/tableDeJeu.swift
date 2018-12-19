@@ -43,7 +43,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
     self.r2 = Reserve()
 
     // Creation des 8 pieces
-    // Note : Prendre en compte que coorX est a l'indice coordX-1 et coordY est a l'indice coordY-1 dans le tableau
+    // Note : Prendre en compte que coordX est a l'indice coordX-1 et coordY est a l'indice coordY-1 dans le tableau
     // Pieces du J1
     self.tab[0][0] = Piece (nom: "tanuki", coordX: 1, coordY: 1, joueur: self.joueur1)
     self.tab[1][0] = Piece (nom: "koropokkuru", coordX: 2, coordY: 1, joueur: self.joueur1)
