@@ -1,14 +1,14 @@
 import Foundation
 
 
-/////////////////////////// --- Tests Table de jeu --- /////////////////////////////////////// 
+/////////////////////////// --- Tests Table de jeu --- ///////////////////////////////////////
 
 
 func verifSearchPiecePosition() -> Int {
     var ret  : Int = 0;
     var tdj = tableDeJeu();
 
-    // Premier cas  : 
+    // Premier cas  :
     if let piece = tdj.searchPiecePosition(coordX : -1 , coordY : 5){
         print("[searchPiecePosition] Mal definie pour parametres <1 ou >4")
         ret = ret + 1;
@@ -26,7 +26,7 @@ func verifSearchPiecePosition() -> Int {
         print("[searchPiecePosition] bien definie pour cases vides")
     }
 
-    // Troisieme cas  : 
+    // Troisieme cas  :
     if let piece = tdj.searchPiecePosition(coordX :2, coordY :2){
         if(piece.nom == "kodama" ){
             print("[searchPiecePosition] trouve correctement les pieces")
@@ -61,7 +61,7 @@ func verifPositionsPossibles() -> Int {
         else if(x == 2 && y == 1) {
                 print("Il y a deja une pièce de vous la-bas.")
                 ret = ret + 1
-            } 
+            }
             else {
                 print("Vous n’avez pas respecte les regles de jeu, votre pièce ne peux pas se deplacer la, meme si la cas est vide.")
                 ret = ret + 1
@@ -74,7 +74,7 @@ func verifValiderActions() -> Int {
     var ret  : Int = 0
     var tdj = TableDeJeu()
     var pc = tdj.searchPiecePosition(coordX : 1, coordY : 1) // tanuki de j1
-    
+
     // Premier cas  : la case ou on veut deplacer n’est pas vide
     var x = tdj.validerAction(piece :pc, coordX :2, coordY :1)
     if(x == true){
@@ -114,13 +114,13 @@ func verifValiderActions() -> Int {
     else {
         print("Bien definie pour positions invalides.")
     }
- 
-    return ret       
+
+    return ret
 }
 
 func verifDeplacerPiece() -> Int {
     // mutating func deplacerPiece(piece : Piece, xApres  : Int, yApres  : Int)
-    var ret  : Int = 0countPositions() 
+    var ret  : Int = 0countPositions()
     var tdj = TableDeJeu()
     var pc = tdj.searchPiecePosition(coordX  : 1,coordY  : 1) // tanuki de j1
 
@@ -144,12 +144,12 @@ func verifCapturerPiece() -> Int {
     var ret  : Int = 0
     var tdj = TableDeJeu()
     var piece = tdj.searchPiecePosition(coordX  : 1,coordY  : 1) // tanuki de j1
-    
+
     // cas ou on ne peut pas se deplacer ici
     if (tdj.validerCapture(Piece : piece,neufX : 1,neufY : 2)){
         print("Mal definie : on ne peut pas capturer un ami.")
         ret = ret + 1
-	}	
+	}
 	else {
 	print("Bien definie, on ne peut pas capturer un ami.")
 	}
@@ -159,7 +159,7 @@ func verifCapturerPiece() -> Int {
 	if (tdj.validerCapture(Piece : piece,neufX : 3,neufY : 2)){
         print("Bien definie : on peut capturer un ennemi.")
         ret = ret + 1
-	}	
+	}
 	else {
 	print("Mal definie : on peut capturer un ennemi.")
 	}
@@ -176,7 +176,7 @@ func verifGagnerPartie() -> Int {
         ret = ret + 1
     }
     else{
-        print("En debut de partie il n’y a pas de gagnant, gagnerPartie bien definie.")   
+        print("En debut de partie il n’y a pas de gagnant, gagnerPartie bien definie.")
     }
 
     return ret
@@ -219,7 +219,7 @@ func verifTransformerKodama() -> Int {
 
     return ret
 
-	
+
 }
 
 
@@ -260,7 +260,7 @@ func verifEstEnPromotion() -> Int {
     return ret
 }
 
-/////////////////////////// --- Tests reserveProtocol --- ////////////////////////////////////// 
+/////////////////////////// --- Tests reserveProtocol --- //////////////////////////////////////
 
 //on test ajouterPiece, et searchPiecePosition doit aussi marcher
 func verifAjouterPiece() -> Int {
@@ -269,7 +269,7 @@ func verifAjouterPiece() -> Int {
 	var pc : Piece = tdj.searchPiecePosition(coordX : 2 , coordY : 2)
 	tdj.reserve2.ajouterPiece(pc)
 	if let pc = tdj.reserve2.searPieceNom("kodama"){
-		print("[ajouterPiece] Bien definie, la piece a ete mise en reserve")	
+		print("[ajouterPiece] Bien definie, la piece a ete mise en reserve")
 	}
 	else{
 		print("[ajouterPiece] Mal defini, la piece n'a pas ete mise en reserve")
@@ -285,43 +285,35 @@ func verifCreationPiece() -> Int {
 	var tdj = TableDeJeu()
 
 	if let pc = Piece ("" , 2, 2, tdj.joueur1) {
-		print("[initPiece] Mal definie pour nom vide")	
+		print("[initPiece] Mal definie pour nom vide")
 		ret = ret + 1
 	}
 	else{
-		print("[initPiece] Bien definie pour nom vide")	
+		print("[initPiece] Bien definie pour nom vide")
 	}
 
 	if let pc = Piece ("kitsunette" , 2, 2, tdj.joueur1) {
-		print("[initPiece] Mal definie pour nom invalide")	
+		print("[initPiece] Mal definie pour nom invalide")
 		ret = ret + 1
 	}
 	else{
-		print("[initPiece] Bien definie pour nom invalide")	
+		print("[initPiece] Bien definie pour nom invalide")
 	}
 
 	if let pc = Piece ("kitsune" , -1, 2, tdj.joueur1) {
-		print("[initPiece] Mal definie pour coordX invalide")	
+		print("[initPiece] Mal definie pour coordX invalide")
 		ret = ret + 1
 	}
 	else{
-		print("[initPiece] Bien definie pour coordX invalide")	
+		print("[initPiece] Bien definie pour coordX invalide")
 	}
 
 	if let pc = Piece ("kitsune" , 1, 5, tdj.joueur1) {
-		print("[initPiece] Mal definie pour coordY invalide")	
+		print("[initPiece] Mal definie pour coordY invalide")
 		ret = ret + 1
 	}
 	else{
-		print("[initPiece] Bien definie pour coordY invalide")	
-	}
-
-	if let pc = Piece ("kitsune" , 1, 2, nil) {
-		print("[initPiece] Mal definie pour joueur nil")	
-		ret = ret + 1
-	}
-	else{
-		print("[initPiece] Bien definie pour joueur nil")	
+		print("[initPiece] Bien definie pour coordY invalide")
 	}
 
 
@@ -331,7 +323,7 @@ func verifCreationPiece() -> Int {
 
 // Il n'y a pas de tests possibles ici non plus.
 
-/////////////////////////// --- Application des tests --- ////////////////////////////////////// 
+/////////////////////////// --- Application des tests --- //////////////////////////////////////
 
 var resFinal : Int = 0
 resFinal += verifSearchPiecePosition()
@@ -344,7 +336,7 @@ resFinal += verifTransformerKodama()
 resFinal += verifParachuter()
 resFinal += verifEstEnPromotion()
 resFinal += verifAjouterPiece()
-resFinal += verifCreationPiece() 
+resFinal += verifCreationPiece()
 
 if resFinal == 0 {
     print("Tous les tests sont passes !")

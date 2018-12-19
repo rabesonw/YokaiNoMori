@@ -25,7 +25,6 @@ public protocol pieceProtocol {
   	//		le nom est un des {'kitsune', 'koropokkuru', 'tanuki', 'kodama', 'kodama samurai'}
   	//		1 <= coordX <= 3
   	//		1 <= coordY <= 4
-  	//		joueur n'est pas nil (une piece appartient a un joueur toujours).
   	// Sinon, la creation echoue
   	init?(nom : String, coordX : Int, coordY : Int, joueur : Joueur) throws
 
@@ -39,5 +38,5 @@ public protocol pieceProtocol {
   	// Post : renvoie True si la piece est en zone de promotion
   	//		pour le joueur1, la zone de promotion est la ligne 4 (c'est a dire coordY == 4)
   	//		et pour joueur2, ligne 1 (c'est a dire coordY == 1)
-  	func estEnPromotion(_ piece : Piece) -> Bool
+  	func estEnPromotion() -> Bool
 }

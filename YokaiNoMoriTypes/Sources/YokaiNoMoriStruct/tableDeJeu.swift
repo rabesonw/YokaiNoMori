@@ -1,17 +1,61 @@
 import Foundation
+import YokaiNoMoriTypes
+
 
 public struct TableDeJeu : tableDeJeuProtocol {
+  private var tab : [[Piece?]]
 
-	public var joueur1 : Joueur{get set}
-	public var joueur2 : Joueur{get set}
+  private var r1 : Reserve // Reserve du j1
+  private var r2 : Reserve // Reserve du j2
 
-  public var reserve1 : Reserve{get}
-  public var reserve2 : Reserve{get}
+	public var joueur1 : Joueur
+	public var joueur2 : Joueur
+
+  public var reserve1 : Reserve {
+    get {
+      return self.r1
+    }
+  }
+
+  public var reserve2 : Reserve {
+    get {
+      return self.r2
+    }
+  }
+
 
 	// init : -> tableDeJeu
 	// creation d’une table de jeu: on initialise la table de jeu, les 2 joueurs, les 2 reserves vides
     // et apres, les 8 pieces
 	public init() {
+    var a = Joueur(nombre : 2)
+    // Init du tableau
+
+    // Cree un tableau de 4 lignes (y) et 3 colonnes (x)
+    self.tab = Array(repeating: Array(repeating: nil, count: 4), count: 3)
+
+    // Creation des joueurs
+    self.joueur1 = Joueur(nombre: 1)
+    self.joueur2 = Joueur(nombre: 2)
+
+    // Creation des reserves vides
+    self.r1 = Reserve()
+    self.r2 = Reserve()
+
+    // Creation des 8 pieces
+    // Note : Prendre en compte que coordX est a l'indice coordX-1 et coordY est a l'indice coordY-1 dans le tableau
+    // Pieces du J1
+    self.tab[0][0] = Piece (nom: "tanuki", coordX: 1, coordY: 1, joueur: self.joueur1)
+    self.tab[1][0] = Piece (nom: "koropokkuru", coordX: 2, coordY: 1, joueur: self.joueur1)
+    self.tab[1][1] = Piece (nom: "kodama", coordX: 2, coordY: 2, joueur: self.joueur1)
+    self.tab[2][0] = Piece (nom: "kitsune", coordX: 3, coordY: 1, joueur: self.joueur1)
+
+    // Pieces du J2
+    self.tab[2][3] = YokaiNoMoriStruct.Piece (nom: "tanuki", coordX: 3, coordY: 4, joueur: self.joueur2)
+    self.tab[1][3] = Piece (nom: "koropokkuru", coordX: 2, coordY: 4, joueur: self.joueur2)
+    self.tab[1][2] = Piece (nom: "kodama", coordX: 2, coordY: 3, joueur: self.joueur2)
+    self.tab[0][3] = Piece (nom: "kitsune", coordX: 1, coordY: 4, joueur: self.joueur2)
+
 
   }
 
@@ -75,7 +119,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	// Post : si les preconditions sont satisfaites, les deux Pieces changent leurs positions
 	//	et la pièce capturee est dans la reserve de le joueur attaquant . Sinon, l’etat de la table de jeu reste le meme.
 	@discardableResult
-	public mutating func capturerPiece(_ pieceAttaquante : Piece, _ neufX : Int, _ neufY : Int) -> SelTableDeJeu {
+	public mutating func capturerPiece(_ pieceAttaquante : Piece, _ neufX : Int, _ neufY : Int) -> TableDeJeu {
 
   }
 
@@ -122,7 +166,9 @@ public struct TableDeJeu : tableDeJeuProtocol {
 
 	// makeIterator : tableDeJeuProtocol -> tableDeJeuIterateurProtocol
     // crée un itérateur sur le collection pour itérer avec for in.
-  public func makeIterator() -> TableDeJeuIterateur
+  public func makeIterator() -> TableDeJeuIterateur {
+
+  }
 
 }
 
