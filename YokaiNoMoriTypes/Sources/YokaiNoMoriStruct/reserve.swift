@@ -1,7 +1,8 @@
 import YokaiNoMoriTypes
 
 public struct Reserve : reserveProtocol {
-
+    typealias Joueur = joueurProtocol
+    
     var res : [Piece]
 
     enum ReserveError: Error {
@@ -12,11 +13,11 @@ public struct Reserve : reserveProtocol {
         self.res = [Piece]()
     }
 
-    public mutating func ajouterPiece(piece : Piece) {
-        self.res.append(Piece)
+    public mutating func ajouterPiece(piece : pieceProtocol) {
+        self.res.append(pieceProtocol)
     }
 
-    public func searchPieceNom(nom : String, joueur : Joueur) -> Piece? {
+    public func searchPieceNom(nom : String, joueur : Joueur) -> pieceProtocol? {
         for piece in self.res {
             if (piece.nom == nom) && (piece.joueur == joueur) {
                 return piece
@@ -45,7 +46,7 @@ public struct reserveIterator : reserveIterateurProtocol {
 
     }
 
-    public func next() -> Piece? {
+    public func next() -> pieceProtocol? {
 
     }
 
