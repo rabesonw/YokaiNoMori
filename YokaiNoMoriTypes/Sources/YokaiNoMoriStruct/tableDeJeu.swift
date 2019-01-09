@@ -4,25 +4,27 @@ import YokaiNoMoriTypes
 
 public struct TableDeJeu : tableDeJeuProtocol {
 
+  typealias Reserve = reserveProtocol
+
   private enum TDJError: Error {
     case initPiece
   }
 
   private var tab : [[pieceProtocol?]]
 
-  private var r1 : reserveProtocol // Reserve du j1
-  private var r2 : reserveProtocol // Reserve du j2
+  private var r1 : Reserve // Reserve du j1
+  private var r2 : Reserve // Reserve du j2
 
 	public var joueur1 : joueurProtocol
 	public var joueur2 : joueurProtocol
 
-  public var reserve1 : reserveProtocol {
+  public var reserve1 : Reserve {
     get {
       return self.r1
     }
   }
 
-  public var reserve2 : reserveProtocol {
+  public var reserve2 : Reserve {
     get {
       return self.r2
     }
@@ -182,15 +184,48 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	@discardableResult
 	public mutating func deplacerPiece(_ Piece: Piece, _ neufX : Int, _ neufY : Int) -> TableDeJeu {
 
+    if self.validerDeplacement(Piece, neufX, neufY) {
+
+      // Deplacement de la piece
+      self.tab[Piece.coordX-1][Piece.coordY-1] = nil
+      Piece.coordX = neufX
+      Piece.coordY = neufY
+      self.tab[neufX-1][neufY-1] = Piece
+
+      // Verif promotion
+      if Piece.nom == "kodama" && Piece.estEnPromotion() {
+        self = self.transformerKodama(Piece)
+      }
+    }
+
+    return self
   }
 
 	// capturerPiece : tableDeJeu x Piece x Piece -> tableDeJeu
 	// capture une pièce de l’autre joueur (donnee par le deuxieme parametre) avec une Piece de le joueur courant
-	// Pre : la capture est valide, conforme au validerDeplacement
+	// Pre : la capture est valide, conforme au validerCapture
 	// Post : si les preconditions sont satisfaites, les deux Pieces changent leurs positions
 	//	et la pièce capturee est dans la reserve de le joueur attaquant . Sinon, l’etat de la table de jeu reste le meme.
 	@discardableResult
 	public mutating func capturerPiece(_ pieceAttaquante : Piece, _ neufX : Int, _ neufY : Int) -> TableDeJeu {
+
+    if (self.validerCapture(pieceAttaquante, neufX, neufY)) {
+      pieceAttaquee = self.tab[neufX-1][neufY-1];
+
+      // transforme
+      if (pieceAttaquee.nom = "kodama samurai") {
+        self = self.tranformerKodama(pieceAttaquee)
+        pieceAttaquee = self.tab[neufX-1][neufY-1];
+      }
+
+      // Ajoute la piece attaquee a la reserve
+      self.mettreEnReserve(pieceAttaquee)
+
+      // Deplacement de la piece
+      self = self.deplacerPiece(pieceAttaquante, neufX, neufY)
+    }
+
+    return self
 
   }
 
@@ -217,7 +252,16 @@ public struct TableDeJeu : tableDeJeuProtocol {
     // Post : la Piece est en reserve et son joueur est changé
 	@discardableResult
 	public mutating func mettreEnReserve(_ piece : Piece) -> TableDeJeu {
-
+    if (self.estSurPlateau(piece)) {
+      if (piece.joueur == self.joueur1) {
+        piece.joueur = self.joueur2
+        self.r2.ajoutePiece(piece)
+      } else {
+        piece.joueur = self.joueur1
+        self.r1.ajoutePiece(piece)
+      }
+    }
+    return self
   }
 
 	// parachuter : tableDeJeu x Piece x Int x Int -> tableDeJeu
@@ -243,6 +287,18 @@ public struct TableDeJeu : tableDeJeuProtocol {
     // crée un itérateur sur le collection pour itérer avec for in.
   public func makeIterator() -> TableDeJeuIterateur {
 
+  }
+
+  // Retourne vrai si la piece fait partie du plateau
+  private func estSurPlateau(_ piece: Piece) -> Bool {
+    for ligne in self.tab {
+      for c in ligne {
+        if c == piece {
+          return true
+        }
+      }
+    }
+    return false
   }
 
 }

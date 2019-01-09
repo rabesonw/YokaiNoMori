@@ -27,7 +27,7 @@ public protocol reserveProtocol : Sequence {
 	// enlevePiece : String x reserveProtocol -> reserveProtocol
 	// enleve la piece qui a le nom donne en parametre de la collection de pieces dans la reserveProtocol
 	// (quand la piece est parachutee).
-	// cette fonction va utiliser searchPieceNom pour trouver la reference 
+	// cette fonction va utiliser searchPieceNom pour trouver la reference
 	// Pre : il y a dans la reserve une piece avec le nom donne
 	// Post : la collection ne contient plus la piece donne en parametre, ou envoie une exception
 	//		si la recherche de la piece selon son nom a echouee
@@ -43,6 +43,7 @@ public protocol reserveIterateurProtocol : IteratorProtocol {
 
 	typealias Piece = pieceProtocol
 
+
 	init(_ res: [Piece])
 
     // next : reserveIterateurProtocol -> reserveIterateurProtocol x pieceProtocol?
@@ -50,6 +51,6 @@ public protocol reserveIterateurProtocol : IteratorProtocol {
     // Pre : aucune
     // Post : retourne la piece suivante dans la collection du Reserve, ou nil si on est au fin de la collection
 
-	func next() -> Piece? 
+	mutating func next() -> Piece?
 
 }
