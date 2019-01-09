@@ -10,10 +10,10 @@ let package = Package(
         .library(
             name: "YokaiNoMoriTypes",
             targets: ["YokaiNoMoriTypes"]),
-	.library(
+      	.library(
             name: "YokaiNoMoriStruct",
             targets: ["YokaiNoMoriStruct"]),
-    ],
+          ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
@@ -24,12 +24,8 @@ let package = Package(
         .target(
             name: "YokaiNoMoriTypes",
             dependencies: []),
-	.target(
+      	.target(
             name: "YokaiNoMoriStruct",
-            dependencies: ["YokaiNoMoriTypes"]),
-        .testTarget(
-            name: "YokaiNoMoriTypesTests",
             dependencies: ["YokaiNoMoriTypes"]),
     ]
 )
-
