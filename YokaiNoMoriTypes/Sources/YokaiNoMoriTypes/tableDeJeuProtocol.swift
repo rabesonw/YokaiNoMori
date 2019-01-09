@@ -6,12 +6,10 @@ public protocol tableDeJeuProtocol : Sequence {
     typealias Joueur = joueurProtocol
     typealias CollectionPositions = collectionPositionsProtocol
 
-    // EDIT
-    typealias Reserve = reserveProtocol
 
 	// l'iterateur associe
 	associatedtype tableDeJeuIterateurProtocol : IteratorProtocol
-	// associatedtype Reserve : reserveProtocol
+	 associatedtype Reserve : reserveProtocol
 
 
 	var joueur1 : Joueur{get set}
