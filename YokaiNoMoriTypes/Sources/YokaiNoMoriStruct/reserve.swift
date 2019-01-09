@@ -1,25 +1,31 @@
 import YokaiNoMoriTypes
 
-public struct Reserve : reserveProtocol {
-    typealias Joueur = joueurProtocol
-    
-    var res : [Piece]
+// public typealias JoueurR = YokaiNoMoriStruct.Joueur
+// public typealias pieceProtocol = YokaiNoMoriStruct.Piece
 
-    enum ReserveError: Error {
+public struct Reserve : reserveProtocol {
+    
+    
+    /*
+        Tableau de piece de la reserve
+    */
+    var res : [pieceProtocol]
+
+    private enum ReserveError: Error {
         case itemNotInRes
     }
     
     public init() {
-        self.res = [Piece]()
+        self.res = [pieceProtocol]()
     }
 
     public mutating func ajouterPiece(piece : pieceProtocol) {
-        self.res.append(pieceProtocol)
+        self.res.append(piece)
     }
 
-    public func searchPieceNom(nom : String, joueur : Joueur) -> pieceProtocol? {
+    func searchPieceNom(nom : String, joueur : Joueur) -> pieceProtocol? {
         for piece in self.res {
-            if (piece.nom == nom) && (piece.joueur == joueur) {
+            if (piece.nom == nom) && (piece.joueur.nombre == joueur.nombre) {
                 return piece
             } else {
                 return nil
@@ -28,26 +34,38 @@ public struct Reserve : reserveProtocol {
     }
 
     public mutating func enlevePiece(nomPiece : String) throws {
-        var tab = self.res
-        self.res = self.res.filter { $0.nom == nomPiece } 
-        if tab == self.res {
+        let pieceProtocolemoved = self.res.filter { $0.nom == nomPiece }
+        if pieceProtocolemoved.isEmpty {
             throw ReserveError.itemNotInRes
+        } else {
+            self.res = self.res.filter { $0.nom != nomPiece } 
         }
+
     }
 
     public func makeIterator() -> reserveIterator {
-        return reserveIterator(self.res)
+        return reserveIterator(self)
     }
 }
 
 public struct reserveIterator : reserveIterateurProtocol {
 
-    init(_ res: [Piece]) {
+    let resIt : Reserve
+    var counter : Int
 
+    init(_ res: Reserve) {
+        self.resIt = res
+        self.counter = 0
     }
 
-    public func next() -> pieceProtocol? {
-
+    public mutating func next() -> pieceProtocol? {
+        if self.counter < self.resIt.res.count {
+            let current : Int = self.counter
+            self.counter += 1
+            return self.resIt.res[current]
+        } else {
+            return nil
+        }
     }
 
 }
