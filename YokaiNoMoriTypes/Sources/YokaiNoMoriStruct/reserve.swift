@@ -4,8 +4,8 @@ import YokaiNoMoriTypes
 // public typealias pieceProtocol = YokaiNoMoriStruct.Piece
 
 public struct Reserve : reserveProtocol {
-    
-    
+
+
     /*
         Tableau de piece de la reserve
     */
@@ -14,7 +14,7 @@ public struct Reserve : reserveProtocol {
     private enum ReserveError: Error {
         case itemNotInRes
     }
-    
+
     public init() {
         self.res = [pieceProtocol]()
     }
@@ -38,7 +38,7 @@ public struct Reserve : reserveProtocol {
         if pieceProtocolemoved.isEmpty {
             throw ReserveError.itemNotInRes
         } else {
-            self.res = self.res.filter { $0.nom != nomPiece } 
+            self.res = self.res.filter { $0.nom != nomPiece }
         }
 
     }

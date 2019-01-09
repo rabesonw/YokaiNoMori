@@ -11,14 +11,14 @@ public protocol tableDeJeuProtocol : Sequence {
 
 	// l'iterateur associe
 	associatedtype tableDeJeuIterateurProtocol : IteratorProtocol
-	 // associatedtype Reserve : reserveProtocol
+	// associatedtype Reserve : reserveProtocol
 
 
 	var joueur1 : Joueur{get set}
 	var joueur2 : Joueur{get set}
 
-    var reserve1 : Reserve{get}
-    var reserve2 : Reserve{get}
+  var reserve1 : Reserve{get}
+  var reserve2 : Reserve{get}
 
 	// init : -> tableDeJeu
 	// creation d’une table de jeu: on initialise la table de jeu, les 2 joueurs, les 2 reserves vides

@@ -10,8 +10,8 @@ public struct TableDeJeu : tableDeJeuProtocol {
 
   private var tab : [[pieceProtocol?]]
 
-  private var r1 : Reserve // Reserve du j1
-  private var r2 : Reserve // Reserve du j2
+  private var r1 : reserveProtocol // Reserve du j1
+  private var r2 : reserveProtocol // Reserve du j2
 
 	public var joueur1 : joueurProtocol
 	public var joueur2 : joueurProtocol
