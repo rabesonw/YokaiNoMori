@@ -333,7 +333,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
   }
 
   // Retourne vrai si la case est vide
-  private func estVide(_ x : Int, _ y : Int) {
+  public func estVide(_ x : Int, _ y : Int) {
     return self.tab[x-1][y-1] == nil
   }
 
@@ -341,8 +341,14 @@ public struct TableDeJeu : tableDeJeuProtocol {
 
 public struct TableDeJeuIterateur : tableDeJeuIterateurProtocol {
 
-  public init() {
+  let tdj : tableDeJeu
+  var x : Int
+  var y : Int
 
+  public init(_ tdj : tableDeJeu) {
+    self.tdj = tdj
+    self.x = 0
+    self.y = 0
   }
 
 	// next : tableDeJeuIterateurProtocol -> tableDeJeuIterateurProtocol x pieceProtocol?
@@ -351,7 +357,32 @@ public struct TableDeJeuIterateur : tableDeJeuIterateurProtocol {
     // Post : retourne la piece suivante dans la collection du tableDeJeu, ou nil si on est au fin de la collection
 
 	public func next() -> Piece? {
+    while self.y>=4 && self.tdj.estVide(x+1, y+1) {
+      self.incrementer()
+    }
 
+    if (self.y>=4) {
+      return nil
+    }
+
+    else {
+      if !self.tdj.estVide(x+1, y+1) {
+        var piece = self.tdj.searchPiecePosition(x+1, y+1)
+        self.incrementer()
+        return piece
+      } else {
+        return nil
+      }
+    }
+  }
+
+  // Passe a la case suivante
+  private func incrementer () {
+    self.x = self.x + 1
+    if self.x >= 3 {
+      self.x = 0
+      self.y = self.y + 1
+    }
   }
 
 }
