@@ -124,7 +124,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
 				colpo.addPosition(x: piece.coordX+1, y: piece.coordY)
 				colpo.addPosition(x: piece.coordX-1, y: piece.coordY)
 				colpo.addPosition(x: piece.coordX+1, y: piece.coordY-1)
-				colpo.addPosition(x: piece.coordX-1, y: piece.coordY-1)				
+				colpo.addPosition(x: piece.coordX-1, y: piece.coordY-1)
 			}
 		}
 		return colpo
@@ -146,7 +146,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
 			for pos in colpo {
 				if (neufX, neufY) == pos {
 					return true
-				} 
+				}
 			}
 		}
   }
@@ -168,7 +168,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
 			for pos in colpo {
 				if (neufX, neufY) == pos {
 					return true
-				} 
+				}
 			}
 		}
   }
@@ -255,10 +255,10 @@ public struct TableDeJeu : tableDeJeuProtocol {
     if (self.estSurPlateau(piece)) {
       if (piece.joueur == self.joueur1) {
         piece.joueur = self.joueur2
-        self.r2.ajoutePiece(piece)
+        self.reserve2.ajoutePiece(piece)
       } else {
         piece.joueur = self.joueur1
-        self.r1.ajoutePiece(piece)
+        self.reserve1.ajoutePiece(piece)
       }
     }
     return self
@@ -272,6 +272,35 @@ public struct TableDeJeu : tableDeJeuProtocol {
     // Post : si les preconditions sont respectees, l’etat de la pièce est change
 	@discardableResult
   public mutating func parachuter(_ piece : Piece, _ neufX : Int, _ neufY : Int) throws -> TableDeJeu {
+    if self.estVide(neufX, neufY) {
+      // Joueur 1
+      if piece.joueur == self.joueur1 {
+
+        // Si la piece est dans la reserve
+        if let p = self.reserve1.searchPieceNom(piece.nom, piece.joueur) {
+          // Retire la piece
+          do {
+            try self.reserve1.enlevePiece(piece.nom)
+          } catch {}
+
+          // Ajout a la tdj
+          self.tab[neufX-1][neufY-1] = piece
+        }
+        // Joueur 2
+      } else {
+
+        // Si la piece est dans la reserve
+        if let p = self.reserve2.searchPieceNom(piece.nom, piece.joueur) {
+          // Retire la piece
+          do {
+            try self.reserve2.enlevePiece(piece.nom)
+          } catch {}
+
+          // Ajout a la tdj
+          self.tab[neufX-1][neufY-1] = piece
+      }
+    }
+
 
   }
 
@@ -293,12 +322,19 @@ public struct TableDeJeu : tableDeJeuProtocol {
   private func estSurPlateau(_ piece: Piece) -> Bool {
     for ligne in self.tab {
       for c in ligne {
-        if c == piece {
-          return true
+        if let c {
+          if c == piece {
+            return true
+          }
         }
       }
     }
     return false
+  }
+
+  // Retourne vrai si la case est vide
+  private func estVide(_ x : Int, _ y : Int) {
+    return self.tab[x-1][y-1] == nil
   }
 
 }
