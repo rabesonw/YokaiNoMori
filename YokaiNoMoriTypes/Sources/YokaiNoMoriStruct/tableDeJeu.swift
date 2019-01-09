@@ -71,13 +71,61 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	// Pre : la piece existe sur le table de Jeu
 	// Post : la piece cherche si les preconditions sont respectees, sinon retourne Vide
 	public func searchPiecePosition(_ coordX : Int,_  coordY : Int) -> Piece? {
-
+		if (coordX<1 || coordY<1) || (coordX>3 || coordY>4) {
+			return nil
+		} else {
+			return self.tab[coordX-1][coordY-1]
+		}
   }
 
 	// positionsPossibles : tableDeJeu x Piece -> CollectionPositions
 	// evaluation des toutes les futurs positions disponibles pour une pièce
 	public func positionsPossibles<CP: CollectionPositions>(_ piece: Piece) -> CP {
-
+		var colpo = CollectionPositions()
+		if piece.nom == "tanuki" {
+			colpo.addPosition(x: piece.coordX+1, y: piece.coordY)
+			colpo.addPosition(x: piece.coordX-1, y: piece.coordY)
+			colpo.addPosition(x: piece.coordX, y: piece.coordY+1)
+			colpo.addPosition(x: piece.coordX, y: piece.coordY-1)
+		} else if piece.nom == "koropokkuru" {
+			colpo.addPosition(x: piece.coordX+1, y: piece.coordY)
+			colpo.addPosition(x: piece.coordX-1, y: piece.coordY)
+			colpo.addPosition(x: piece.coordX, y: piece.coordY+1)
+			colpo.addPosition(x: piece.coordX, y: piece.coordY-1)
+			colpo.addPosition(x: piece.coordX+1, y: piece.coordY+1)
+			colpo.addPosition(x: piece.coordX+1, y: piece.coordY-1)
+			colpo.addPosition(x: piece.coordX-1, y: piece.coordY+1)
+			colpo.addPosition(x: piece.coordX-1, y: piece.coordY-1)
+		} else if piece.nom == "kitsune" {
+			colpo.addPosition(x: piece.coordX+1, y: piece.coordY+1)
+			colpo.addPosition(x: piece.coordX+1, y: piece.coordY-1)
+			colpo.addPosition(x: piece.coordX-1, y: piece.coordY+1)
+			colpo.addPosition(x: piece.coordX-1, y: piece.coordY-1)
+		}
+		if piece.joueur == self.joueur1 {
+			if piece.nom == "kodama" {
+				colpo.addPosition(x: piece.coordX, y: piece.coordY+1)
+			} else if piece.nom == "kodama samurai" {
+				colpo.addPosition(x: piece.coordX, y: piece.coordY-1)
+				colpo.addPosition(x: piece.coordX, y: piece.coordY+1)
+				colpo.addPosition(x: piece.coordX+1, y: piece.coordY)
+				colpo.addPosition(x: piece.coordX-1, y: piece.coordY)
+				colpo.addPosition(x: piece.coordX+1, y: piece.coordY+1)
+				colpo.addPosition(x: piece.coordX-1, y: piece.coordY+1)
+			}
+		} else if piece.joueur == self.joueur2 {
+			if piece.nom == "kodama" {
+				colpo.addPosition(x: piece.coordX, y: piece.coordY-1)
+			} else if piece.nom == "kodama samurai" {
+				colpo.addPosition(x: piece.coordX, y: piece.coordY-1)
+				colpo.addPosition(x: piece.coordX, y: piece.coordY+1)
+				colpo.addPosition(x: piece.coordX+1, y: piece.coordY)
+				colpo.addPosition(x: piece.coordX-1, y: piece.coordY)
+				colpo.addPosition(x: piece.coordX+1, y: piece.coordY-1)
+				colpo.addPosition(x: piece.coordX-1, y: piece.coordY-1)				
+			}
+		}
+		return colpo
   }
 
 	// validerDeplacement : tableDeJeu x Piece x Int x Int -> Bool
@@ -89,7 +137,16 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	//		1 <= x <= 3 et 1 <= y <=4.
 	//		renvoie False sinon.
 	public func validerDeplacement(_ Piece : Piece, _ neufX : Int, _ neufY : Int) -> Bool {
-
+		var colpo = self.positionsPossibles(Piece)
+		if neufX < 1 || neufY < 1 || neufX > 3 || neufY > 4 || self.tab[neufX-1][neufY-1] != nil {
+			return false
+		} else {
+			for pos in colpo {
+				if (neufX, neufY) == pos {
+					return true
+				} 
+			}
+		}
   }
 
 
@@ -102,7 +159,16 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	//		1 <= x <= 3 et 1 <= y <=4.
 	//		renvoie False sinon.
 	public func validerCapture(_ Piece : Piece, _ neufX : Int, _ neufY : Int) -> Bool {
-
+		var colpo = self.positionsPossibles(Piece)
+		if neufX < 1 || neufY < 1 || neufX > 3 || neufY > 4 || self.tab[neufX-1][neufY-1].joueur == Piece.joueur {
+			return false
+		} else {
+			for pos in colpo {
+				if (neufX, neufY) == pos {
+					return true
+				} 
+			}
+		}
   }
 
 
@@ -138,7 +204,11 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	//        ou c'est un kodama dans la reserve de l'attaquant
 	@discardableResult
 	public mutating func transformerKodama(_ piece : Piece) throws -> TableDeJeu {
-
+		if piece.nom == "kodama" && self.estSurPlateau(piece) {
+			piece.nom = "kodama samurai"
+		} else if piece.nom == "kodama samurai" && !self.estSurPlateau(piece) {
+			piece.nom = "kodama"
+		}
   }
 
     // mettreEnReserve : tableDeJeu x Piece -> tableDeJeu
