@@ -12,19 +12,19 @@ public struct TableDeJeu : tableDeJeuProtocol {
 
   private var tab : [[pieceProtocol?]]
 
-  private var r1 : Reserve // Reserve du j1
-  private var r2 : Reserve // Reserve du j2
+  private var r1 : reserveProtocol // Reserve du j1
+  private var r2 : reserveProtocol // Reserve du j2
 
 	public var joueur1 : joueurProtocol
 	public var joueur2 : joueurProtocol
 
-  public var reserve1 : Reserve {
+  public var reserve1 : reserveProtocol {
     get {
       return self.r1
     }
   }
 
-  public var reserve2 : Reserve {
+  public var reserve2 : reserveProtocol {
     get {
       return self.r2
     }
@@ -72,7 +72,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	// 		1 <= coordX <= 3 , 1 <= coordY <= 4
 	// Pre : la piece existe sur le table de Jeu
 	// Post : la piece cherche si les preconditions sont respectees, sinon retourne Vide
-	public func searchPiecePosition(_ coordX : Int,_  coordY : Int) -> Piece? {
+	public func searchPiecePosition(_ coordX : Int,_  coordY : Int) -> pieceProtocol? {
 		if (coordX<1 || coordY<1) || (coordX>3 || coordY>4) {
 			return nil
 		} else {
@@ -82,7 +82,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
 
 	// positionsPossibles : tableDeJeu x Piece -> CollectionPositions
 	// evaluation des toutes les futurs positions disponibles pour une pièce
-	public func positionsPossibles<CP: CollectionPositions>(_ piece: Piece) -> CP {
+	public func positionsPossibles<CP: CollectionPositions>(_ piece: pieceProtocol) -> CP {
 		var colpo = CollectionPositions()
 		if piece.nom == "tanuki" {
 			colpo.addPosition(x: piece.coordX+1, y: piece.coordY)
@@ -138,7 +138,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	//		la case (neufX, neufY) est vide
 	//		1 <= x <= 3 et 1 <= y <=4.
 	//		renvoie False sinon.
-	public func validerDeplacement(_ Piece : Piece, _ neufX : Int, _ neufY : Int) -> Bool {
+	public func validerDeplacement(_ Piece : pieceProtocol, _ neufX : Int, _ neufY : Int) -> Bool {
 		var colpo = self.positionsPossibles(Piece)
 		if neufX < 1 || neufY < 1 || neufX > 3 || neufY > 4 || !self.estVide(neufX, neufY) {
 			return false
@@ -160,7 +160,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	//		la case (neufX, neufY) est occupee par une piece ennemie
 	//		1 <= x <= 3 et 1 <= y <=4.
 	//		renvoie False sinon.
-	public func validerCapture(_ Piece : Piece, _ neufX : Int, _ neufY : Int) -> Bool {
+	public func validerCapture(_ Piece : pieceProtocol, _ neufX : Int, _ neufY : Int) -> Bool {
 		var colpo = self.positionsPossibles(Piece)
 		if neufX < 1 || neufY < 1 || neufX > 3 || neufY > 4 || self.tab[neufX-1][neufY-1].joueur == Piece.joueur {
 			return false
@@ -182,7 +182,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	//		Apres on deplace la piece, on verifie si on doit la promouvoir, en appelant
 	//		estEnPromotion(piece) pour verifier, et transformerKodama(piece) pour la transformer.
 	@discardableResult
-	public mutating func deplacerPiece(_ Piece: Piece, _ neufX : Int, _ neufY : Int) -> TableDeJeu {
+	public mutating func deplacerPiece(_ Piece: pieceProtocol, _ neufX : Int, _ neufY : Int) -> tableDeJeuProtocol {
 
     if self.validerDeplacement(Piece, neufX, neufY) {
 
@@ -207,7 +207,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	// Post : si les preconditions sont satisfaites, les deux Pieces changent leurs positions
 	//	et la pièce capturee est dans la reserve de le joueur attaquant . Sinon, l’etat de la table de jeu reste le meme.
 	@discardableResult
-	public mutating func capturerPiece(_ pieceAttaquante : Piece, _ neufX : Int, _ neufY : Int) -> TableDeJeu {
+	public mutating func capturerPiece(_ pieceAttaquante : pieceProtocol, _ neufX : Int, _ neufY : Int) -> tableDeJeuProtocol {
 
     if (self.validerCapture(pieceAttaquante, neufX, neufY)) {
       pieceAttaquee = self.tab[neufX-1][neufY-1];
@@ -238,7 +238,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	// Post : la nouvelle Piece est au même emplacement mais est un kodama samourai
 	//        ou c'est un kodama dans la reserve de l'attaquant
 	@discardableResult
-	public mutating func transformerKodama(_ piece : Piece) throws -> TableDeJeu {
+	public mutating func transformerKodama(_ piece : pieceProtocol) throws -> tableDeJeuProtocol {
 		if piece.nom == "kodama" && self.estSurPlateau(piece) {
 			piece.nom = "kodama samurai"
 		} else if piece.nom == "kodama samurai" && !self.estSurPlateau(piece) {
@@ -251,7 +251,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
     // Pre : la pièce est sur la table de jeu (contre-exemple : etre deja en reserve)
     // Post : la Piece est en reserve et son joueur est changé
 	@discardableResult
-	public mutating func mettreEnReserve(_ piece : Piece) -> TableDeJeu {
+	public mutating func mettreEnReserve(_ piece : pieceProtocol) -> tableDeJeuProtocol {
     if (self.estSurPlateau(piece)) {
       if (piece.joueur == self.joueur1) {
         piece.joueur = self.joueur2
@@ -271,7 +271,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
     // Pre : la neuf case est libre avant parachuter
     // Post : si les preconditions sont respectees, l’etat de la pièce est change
 	@discardableResult
-  public mutating func parachuter(_ piece : Piece, _ neufX : Int, _ neufY : Int) throws -> TableDeJeu {
+  public mutating func parachuter(_ piece : pieceProtocol, _ neufX : Int, _ neufY : Int) throws -> tableDeJeuProtocol {
     if self.estVide(neufX, neufY) {
       // Joueur 1
       if piece.joueur == self.joueur1 {
@@ -308,7 +308,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	// verifie si la partie est gagnée par le joueur indique par le parametre
 	// Pre : aucune
 	// Post : renvoie true si le jouer donne a gagne, false sinon
-  public func gagnerPartie(_ joueur : Joueur) -> Bool {
+  public func gagnerPartie(_ joueur : joueurProtocol) -> Bool {
 		if joueur == self.joueur1 {
 			for i in 0...2 {
 				if tab[i][3].nom == "koropokkuru" || tab[i][3].joueur == joueur {
@@ -342,7 +342,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
   }
 
   // Retourne vrai si la piece fait partie du plateau
-  private func estSurPlateau(_ piece: Piece) -> Bool {
+  private func estSurPlateau(_ piece: pieceProtocol) -> Bool {
     for ligne in self.tab {
       for c in ligne {
         if let c {
@@ -379,7 +379,7 @@ public struct TableDeJeuIterateur : tableDeJeuIterateurProtocol {
     // Pre : aucune
     // Post : retourne la piece suivante dans la collection du tableDeJeu, ou nil si on est au fin de la collection
 
-	public func next() -> Piece? {
+	public func next() -> pieceProtocol? {
     while self.y>=4 && self.tdj.estVide(x+1, y+1) {
       self.incrementer()
     }
