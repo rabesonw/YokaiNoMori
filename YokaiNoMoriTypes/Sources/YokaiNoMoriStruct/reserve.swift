@@ -1,7 +1,7 @@
 import YokaiNoMoriTypes
 
-public typealias JoueurR = YokaiNoMoriStruct.joueur
-public typealias PieceR = YokaiNoMoriStruct.Piece
+// public typealias JoueurR = YokaiNoMoriStruct.Joueur
+// public typealias pieceProtocol = YokaiNoMoriStruct.Piece
 
 public struct Reserve : reserveProtocol {
     
@@ -9,21 +9,21 @@ public struct Reserve : reserveProtocol {
     /*
         Tableau de piece de la reserve
     */
-    var res : [PieceR]
+    var res : [pieceProtocol]
 
     private enum ReserveError: Error {
         case itemNotInRes
     }
     
     public init() {
-        self.res = [PieceR]()
+        self.res = [pieceProtocol]()
     }
 
-    public mutating func ajouterPiece(piece : PieceR) {
+    public mutating func ajouterPiece(piece : pieceProtocol) {
         self.res.append(piece)
     }
 
-    func searchPieceNom(nom : String, joueur : Joueur) -> PieceR? {
+    func searchPieceNom(nom : String, joueur : Joueur) -> pieceProtocol? {
         for piece in self.res {
             if (piece.nom == nom) && (piece.joueur.nombre == joueur.nombre) {
                 return piece
@@ -34,8 +34,8 @@ public struct Reserve : reserveProtocol {
     }
 
     public mutating func enlevePiece(nomPiece : String) throws {
-        let pieceRemoved = self.res.filter { $0.nom == nomPiece }
-        if pieceRemoved.isEmpty {
+        let pieceProtocolemoved = self.res.filter { $0.nom == nomPiece }
+        if pieceProtocolemoved.isEmpty {
             throw ReserveError.itemNotInRes
         } else {
             self.res = self.res.filter { $0.nom != nomPiece } 
@@ -58,7 +58,7 @@ public struct reserveIterator : reserveIterateurProtocol {
         self.counter = 0
     }
 
-    public mutating func next() -> PieceR? {
+    public mutating func next() -> pieceProtocol? {
         if self.counter < self.resIt.res.count {
             let current : Int = self.counter
             self.counter += 1
