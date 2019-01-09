@@ -52,15 +52,15 @@ public struct TableDeJeu : tableDeJeuProtocol {
     // Pieces du J1
     do {
       try self.tab[0][0] = YokaiNoMoriStruct.Piece(nom: "tanuki", coordX: 1, coordY: 1, joueur: self.joueur1)
-      try self.tab[1][0] = YokaiNoMoriStruct.Piece (nom: "koropokkuru", coordX: 2, coordY: 1, joueur: self.joueur1)
-      try self.tab[1][1] = YokaiNoMoriStruct.Piece (nom: "kodama", coordX: 2, coordY: 2, joueur: self.joueur1)
-      try self.tab[2][0] = YokaiNoMoriStruct.Piece (nom: "kitsune", coordX: 3, coordY: 1, joueur: self.joueur1)
+      try self.tab[1][0] = YokaiNoMoriStruct.Piece(nom: "koropokkuru", coordX: 2, coordY: 1, joueur: self.joueur1)
+      try self.tab[1][1] = YokaiNoMoriStruct.Piece(nom: "kodama", coordX: 2, coordY: 2, joueur: self.joueur1)
+      try self.tab[2][0] = YokaiNoMoriStruct.Piece(nom: "kitsune", coordX: 3, coordY: 1, joueur: self.joueur1)
 
       // Pieces du J2
-      try self.tab[2][3] = YokaiNoMoriStruct.Piece (nom: "tanuki", coordX: 3, coordY: 4, joueur: self.joueur2)
-      try self.tab[1][3] = YokaiNoMoriStruct.Piece (nom: "koropokkuru", coordX: 2, coordY: 4, joueur: self.joueur2)
-      try self.tab[1][2] = YokaiNoMoriStruct.Piece (nom: "kodama", coordX: 2, coordY: 3, joueur: self.joueur2)
-      try self.tab[0][3] = YokaiNoMoriStruct.Piece (nom: "kitsune", coordX: 1, coordY: 4, joueur: self.joueur2)
+      try self.tab[2][3] = YokaiNoMoriStruct.Piece(nom: "tanuki", coordX: 3, coordY: 4, joueur: self.joueur2)
+      try self.tab[1][3] = YokaiNoMoriStruct.Piece(nom: "koropokkuru", coordX: 2, coordY: 4, joueur: self.joueur2)
+      try self.tab[1][2] = YokaiNoMoriStruct.Piece(nom: "kodama", coordX: 2, coordY: 3, joueur: self.joueur2)
+      try self.tab[0][3] = YokaiNoMoriStruct.Piece(nom: "kitsune", coordX: 1, coordY: 4, joueur: self.joueur2)
     }
     catch{}
 
@@ -140,7 +140,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	//		renvoie False sinon.
 	public func validerDeplacement(_ Piece : Piece, _ neufX : Int, _ neufY : Int) -> Bool {
 		var colpo = self.positionsPossibles(Piece)
-		if neufX < 1 || neufY < 1 || neufX > 3 || neufY > 4 || self.tab[neufX-1][neufY-1] != nil {
+		if neufX < 1 || neufY < 1 || neufX > 3 || neufY > 4 || !self.estVide(neufX, neufY) {
 			return false
 		} else {
 			for pos in colpo {
@@ -279,14 +279,37 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	// verifie si la partie est gagnée par le joueur indique par le parametre
 	// Pre : aucune
 	// Post : renvoie true si le jouer donne a gagne, false sinon
-  public func gagnerPartie(_ joueur : Joueur) -> TableDeJeu {
-
+  public func gagnerPartie(_ joueur : Joueur) -> Bool {
+		if joueur == self.joueur1 {
+			for i in 0...2 {
+				if tab[i][3].nom == "koropokkuru" || tab[i][3].joueur == joueur {
+					return true
+				}
+			}
+			for piece in self.reserve1 {
+				if piece.nom == "koropokkuru" {
+					return true
+				}
+			}
+		} else {
+			for i in 0...2 {
+				if tab[i][0].nom == "koropokkuru" || tab[i][0].joueur == joueur {
+					return true
+				}
+			}
+			for piece in self.reserve2 {
+				if piece.nom == "koropokkuru" {
+					return true
+				}
+			}
+		}
+		return false
   }
 
 	// makeIterator : tableDeJeuProtocol -> tableDeJeuIterateurProtocol
     // crée un itérateur sur le collection pour itérer avec for in.
   public func makeIterator() -> TableDeJeuIterateur {
-
+		return TableDeJeuIterator(self)
   }
 
   // Retourne vrai si la piece fait partie du plateau
@@ -305,7 +328,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
 
 public struct TableDeJeuIterateur : tableDeJeuIterateurProtocol {
 
-  public init() {
+  public init(_ tab: tableDeJeuProtocol) {
 
   }
 
