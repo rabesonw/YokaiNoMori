@@ -19,11 +19,11 @@ public struct Reserve : reserveProtocol {
         self.res = [pieceProtocol]()
     }
 
-    public mutating func ajouterPiece(piece : pieceProtocol) {
+    public mutating func ajoutePiece(piece : pieceProtocol) {
         self.res.append(piece)
     }
 
-    func searchPieceNom(nom : String, joueur : Joueur) -> pieceProtocol? {
+    public func searchPieceNom(nom : String, joueur : joueurProtocol) -> pieceProtocol? {
         for piece in self.res {
             if (piece.nom == nom) && (piece.joueur.nombre == joueur.nombre) {
                 return piece
@@ -31,6 +31,7 @@ public struct Reserve : reserveProtocol {
                 return nil
             }
         }
+        return nil
     }
 
     public mutating func enlevePiece(nomPiece : String) throws {
@@ -44,25 +45,25 @@ public struct Reserve : reserveProtocol {
     }
 
     public func makeIterator() -> reserveIterator {
-        return reserveIterator(self)
+        return reserveIterator(self.res)
     }
 }
 
 public struct reserveIterator : reserveIterateurProtocol {
 
-    let resIt : Reserve
+    let resIt : [pieceProtocol]
     var counter : Int
 
-    init(_ res: Reserve) {
+    public init(_ res: [pieceProtocol]) {
         self.resIt = res
         self.counter = 0
     }
 
     public mutating func next() -> pieceProtocol? {
-        if self.counter < self.resIt.res.count {
+        if self.counter < self.resIt.count {
             let current : Int = self.counter
             self.counter += 1
-            return self.resIt.res[current]
+            return self.resIt[current]
         } else {
             return nil
         }
