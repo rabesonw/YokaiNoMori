@@ -3,21 +3,26 @@ import YokaiNoMoriTypes
 
 
 public struct TableDeJeu : tableDeJeuProtocol {
-  private var tab : [[Piece?]]
+
+  private enum TDJError: Error {
+    case initPiece
+  }
+
+  private var tab : [[pieceProtocol?]]
 
   private var r1 : Reserve // Reserve du j1
   private var r2 : Reserve // Reserve du j2
 
-	public var joueur1 : Joueur
-	public var joueur2 : Joueur
+	public var joueur1 : joueurProtocol
+	public var joueur2 : joueurProtocol
 
-  public var reserve1 : Reserve {
+  public var reserve1 : reserveProtocol {
     get {
       return self.r1
     }
   }
 
-  public var reserve2 : Reserve {
+  public var reserve2 : reserveProtocol {
     get {
       return self.r2
     }
@@ -28,34 +33,34 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	// creation d’une table de jeu: on initialise la table de jeu, les 2 joueurs, les 2 reserves vides
     // et apres, les 8 pieces
 	public init() {
-    var a = Joueur(nombre : 2)
     // Init du tableau
-
     // Cree un tableau de 4 lignes (y) et 3 colonnes (x)
     self.tab = Array(repeating: Array(repeating: nil, count: 4), count: 3)
 
     // Creation des joueurs
-    self.joueur1 = Joueur(nombre: 1)
-    self.joueur2 = Joueur(nombre: 2)
+    self.joueur1 = YokaiNoMoriStruct.Joueur(nombre: 1)
+    self.joueur2 = YokaiNoMoriStruct.Joueur(nombre: 2)
 
     // Creation des reserves vides
-    self.r1 = Reserve()
-    self.r2 = Reserve()
+    self.r1 = YokaiNoMoriStruct.Reserve()
+    self.r2 = YokaiNoMoriStruct.Reserve()
 
     // Creation des 8 pieces
     // Note : Prendre en compte que coordX est a l'indice coordX-1 et coordY est a l'indice coordY-1 dans le tableau
     // Pieces du J1
-    self.tab[0][0] = Piece (nom: "tanuki", coordX: 1, coordY: 1, joueur: self.joueur1)
-    self.tab[1][0] = Piece (nom: "koropokkuru", coordX: 2, coordY: 1, joueur: self.joueur1)
-    self.tab[1][1] = Piece (nom: "kodama", coordX: 2, coordY: 2, joueur: self.joueur1)
-    self.tab[2][0] = Piece (nom: "kitsune", coordX: 3, coordY: 1, joueur: self.joueur1)
+    do {
+      try self.tab[0][0] = YokaiNoMoriStruct.Piece(nom: "tanuki", coordX: 1, coordY: 1, joueur: self.joueur1)
+      try self.tab[1][0] = YokaiNoMoriStruct.Piece (nom: "koropokkuru", coordX: 2, coordY: 1, joueur: self.joueur1)
+      try self.tab[1][1] = YokaiNoMoriStruct.Piece (nom: "kodama", coordX: 2, coordY: 2, joueur: self.joueur1)
+      try self.tab[2][0] = YokaiNoMoriStruct.Piece (nom: "kitsune", coordX: 3, coordY: 1, joueur: self.joueur1)
 
-    // Pieces du J2
-    self.tab[2][3] = YokaiNoMoriStruct.Piece (nom: "tanuki", coordX: 3, coordY: 4, joueur: self.joueur2)
-    self.tab[1][3] = Piece (nom: "koropokkuru", coordX: 2, coordY: 4, joueur: self.joueur2)
-    self.tab[1][2] = Piece (nom: "kodama", coordX: 2, coordY: 3, joueur: self.joueur2)
-    self.tab[0][3] = Piece (nom: "kitsune", coordX: 1, coordY: 4, joueur: self.joueur2)
-
+      // Pieces du J2
+      try self.tab[2][3] = YokaiNoMoriStruct.Piece (nom: "tanuki", coordX: 3, coordY: 4, joueur: self.joueur2)
+      try self.tab[1][3] = YokaiNoMoriStruct.Piece (nom: "koropokkuru", coordX: 2, coordY: 4, joueur: self.joueur2)
+      try self.tab[1][2] = YokaiNoMoriStruct.Piece (nom: "kodama", coordX: 2, coordY: 3, joueur: self.joueur2)
+      try self.tab[0][3] = YokaiNoMoriStruct.Piece (nom: "kitsune", coordX: 1, coordY: 4, joueur: self.joueur2)
+    }
+    catch{}
 
   }
 
