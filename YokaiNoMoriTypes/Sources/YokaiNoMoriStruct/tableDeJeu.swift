@@ -3,7 +3,6 @@ import YokaiNoMoriTypes
 
 
 public struct TableDeJeu : tableDeJeuProtocol {
-  typealias Reserve = reserveProtocol
 
   typealias CP = YokaiNoMoriStruct.CollectionPositions
 
@@ -14,19 +13,19 @@ public struct TableDeJeu : tableDeJeuProtocol {
 
   private var tab : [[pieceProtocol?]]
 
-  private var r1 : reserveProtocol // Reserve du j1
-  private var r2 : reserveProtocol // Reserve du j2
+  private var r1 : YokaiNoMoriStruct.Reserve // Reserve du j1
+  private var r2 : YokaiNoMoriStruct.Reserve // Reserve du j2
 
 	public var joueur1 : joueurProtocol
 	public var joueur2 : joueurProtocol
 
-  public var reserve1 : reserveProtocol {
+  public var reserve1 : YokaiNoMoriStruct.Reserve {
     get {
       return self.r1
     }
   }
 
-  public var reserve2 : reserveProtocol {
+  public var reserve2 : YokaiNoMoriStruct.Reserve {
     get {
       return self.r2
     }
@@ -85,7 +84,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	// positionsPossibles : tableDeJeu x Piece -> CollectionPositions
 	// evaluation des toutes les futurs positions disponibles pour une pièce
 	public func positionsPossibles<CP: collectionPositionsProtocol>(_ piece: pieceProtocol) -> CP {
-		var colpo = YokaiNoMoriStruct.CollectionPositions()
+		var colpo = CP()
 		if piece.nom == "tanuki" {
 			colpo.addPosition(x: piece.coordX+1, y: piece.coordY)
 			colpo.addPosition(x: piece.coordX-1, y: piece.coordY)
@@ -129,7 +128,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
 				colpo.addPosition(x: piece.coordX-1, y: piece.coordY-1)
 			}
 		}
-		return colpo
+    return colpo
   }
 
 	// validerDeplacement : tableDeJeu x Piece x Int x Int -> Bool
@@ -141,7 +140,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	//		1 <= x <= 3 et 1 <= y <=4.
 	//		renvoie False sinon.
 	public func validerDeplacement(_ Piece : pieceProtocol, _ neufX : Int, _ neufY : Int) -> Bool {
-		var colpo = self.positionsPossibles(Piece)
+		let colpo : CP = self.positionsPossibles(Piece)
 		if neufX < 1 || neufY < 1 || neufX > 3 || neufY > 4 || !self.estVide(neufX, neufY) {
 			return false
 		} else {
@@ -151,6 +150,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
 				}
 			}
 		}
+    return false
   }
 
 
@@ -163,7 +163,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	//		1 <= x <= 3 et 1 <= y <=4.
 	//		renvoie False sinon.
 	public func validerCapture(_ Piece : pieceProtocol, _ neufX : Int, _ neufY : Int) -> Bool {
-		var colpo = self.positionsPossibles(Piece)
+		let colpo : CP  = self.positionsPossibles(Piece)
     guard let p = self.tab[neufX-1][neufY-1] else {
       return false
     }
@@ -176,6 +176,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
 				}
 			}
 		}
+    return false
   }
 
 
@@ -187,7 +188,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	//		Apres on deplace la piece, on verifie si on doit la promouvoir, en appelant
 	//		estEnPromotion(piece) pour verifier, et transformerKodama(piece) pour la transformer.
 	@discardableResult
-	public mutating func deplacerPiece(_ Piece: pieceProtocol, _ neufX : Int, _ neufY : Int) -> tableDeJeuProtocol {
+	public mutating func deplacerPiece(_ Piece: pieceProtocol, _ neufX : Int, _ neufY : Int) -> TableDeJeu {
 
     if self.validerDeplacement(Piece, neufX, neufY) {
 
@@ -215,7 +216,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	// Post : si les preconditions sont satisfaites, les deux Pieces changent leurs positions
 	//	et la pièce capturee est dans la reserve de le joueur attaquant . Sinon, l’etat de la table de jeu reste le meme.
 	@discardableResult
-	public mutating func capturerPiece(_ pieceAttaquante : pieceProtocol, _ neufX : Int, _ neufY : Int) -> tableDeJeuProtocol {
+	public mutating func capturerPiece(_ pieceAttaquante : pieceProtocol, _ neufX : Int, _ neufY : Int) -> TableDeJeu {
 
     if (self.validerCapture(pieceAttaquante, neufX, neufY)) {
       var pieceAttaquee = self.tab[neufX-1][neufY-1]!;
@@ -249,7 +250,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	// Post : la nouvelle Piece est au même emplacement mais est un kodama samourai
 	//        ou c'est un kodama dans la reserve de l'attaquant
 	@discardableResult
-	public mutating func transformerKodama(_ piece : pieceProtocol) throws -> tableDeJeuProtocol {
+	public mutating func transformerKodama(_ piece : pieceProtocol) throws -> TableDeJeu {
     let piece = self.tab[piece.coordX-1][piece.coordY-1]
     if piece != nil {
       var p = piece!
@@ -264,6 +265,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
     } else {
       throw TDJError.kodamaNotInTDJ
     }
+    return self
 
   }
 
@@ -272,7 +274,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
     // Pre : la pièce est sur la table de jeu (contre-exemple : etre deja en reserve)
     // Post : la Piece est en reserve et son joueur est changé
 	@discardableResult
-	public mutating func mettreEnReserve(_ piece : pieceProtocol) -> tableDeJeuProtocol {
+	public mutating func mettreEnReserve(_ piece : pieceProtocol) -> TableDeJeu {
     var p = piece
 
     if (self.estSurPlateau(p)) {
@@ -294,7 +296,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
     // Pre : la neuf case est libre avant parachuter
     // Post : si les preconditions sont respectees, l’etat de la pièce est change
 	@discardableResult
-  public mutating func parachuter(_ piece : pieceProtocol, _ neufX : Int, _ neufY : Int) throws -> tableDeJeuProtocol {
+  public mutating func parachuter(_ piece : pieceProtocol, _ neufX : Int, _ neufY : Int) throws -> TableDeJeu {
     if self.estVide(neufX, neufY) {
       // Joueur 1
       if piece.joueur.nombre == self.joueur1.nombre {
@@ -324,6 +326,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
         }
       }
     }
+    return self
   }
 
 	// gagnerPartie : tableDeJeu x Joueur -> Bool
