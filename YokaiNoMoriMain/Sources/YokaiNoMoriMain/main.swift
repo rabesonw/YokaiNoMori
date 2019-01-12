@@ -1,17 +1,18 @@
 import Foundation
 import YokaiNoMoriTypes
+import YokaiNoMoriStruct
 
-// afficheTableCourante : tableDeJeu ->
+// afficheTableCourante : TableDeJeu ->
 // une fonction qui, apres chaque tour, montre la table de jeu aux joueurs
-func afficheTableCourante(tdj : tableDeJeu) {
+func afficheTableCourante(tdj : TableDeJeu) {
     print("______ETAT COURANT______")
     print("X : 1 \t 2 \t 3 \t")
     for i in 1...4 {
-        print("Y : " + i)
+        print("Y : \(i)")
         for j in 1...3 {
             if let pc = tdj.searchPiecePosition(i, j){
-                if(pc.joueur == tdj.joueur1){
-                  print(pc.nom + " j1| \t")  
+                if(pc.joueur.nombre == tdj.joueur1.nombre){
+                  print(pc.nom + " j1| \t")
                 }
                 else {
                     print(pc.nom + " j2| \t")
@@ -20,15 +21,15 @@ func afficheTableCourante(tdj : tableDeJeu) {
             else {
                 print(" | \t")
             }
-            
+
         }
     }
-    
+
     print("Reserve du joueur 1 : ")
     for piece in tdj.reserve1 {
         print(" , " + piece.nom)
     }
-    
+
     print("Reserve du joueur 2 : ")
     for piece in tdj.reserve2 {
         print(" , " + piece.nom )
@@ -36,27 +37,27 @@ func afficheTableCourante(tdj : tableDeJeu) {
 
 }
 
-// parseCommandJoueur: tableDeJeu x Joueur x String -> Boolean
+// parseCommandJoueur: TableDeJeu x Joueur x String -> Boolean
 // une fonction qui parse et execute la commande pris, en appelant les fonctions necessaires pour
-// l’executer. 
+// l’executer.
 // Pre : aucune
 // Post : Retourne true si l’action est valide, false sinon
-func parseCommandeJoueur(tdj : tableDeJeu, joueur: Joueur, cmd : String) -> Bool {
+func parseCommandeJoueur(tdj : inout TableDeJeu, joueur: Joueur, cmd : String) -> Bool {
 
     // cmda = array de mots dans cmd (‘deplacer 1 2 3 4’ devient [‘deplacer’ , ‘1‘, ’2’ , ‘3’, ‘4’ ])
     var cmda = cmd.components(separatedBy: " ")
     switch (cmda[0]) {
-        
+
     case "deplacer":
         let x1s : Int? = Int(cmda[1])
         let y1s : Int? = Int(cmda[2])
         let x2s : Int? = Int(cmda[3])
         let y2s : Int? = Int(cmda[4])
-        
+
         if let x1 = x1s, let y1 = y1s, let x2 = x2s, let y2 = y2s {
-            if let piece = tdj.searchPiecePosition(coordX : x1, coordY : y1) {
-                if (tdj.validerDeplacement(Piece : piece, neufX : x2, neufY : y2)){
-                    tdj.deplacerPiece(Piece : piece, neufX : x2, neufY : y2)
+            if let piece = tdj.searchPiecePosition(x1, y1) {
+                if (tdj.validerDeplacement(piece, x2, y2)){
+                    tdj.deplacerPiece(piece, x2, y2)
                 }
                 else {
                     return false
@@ -75,11 +76,11 @@ func parseCommandeJoueur(tdj : tableDeJeu, joueur: Joueur, cmd : String) -> Bool
         let y1s : Int? = Int(cmda[2])
         let x2s : Int? = Int(cmda[3])
         let y2s : Int? = Int(cmda[4])
-        
+
         if let x1 = x1s, let y1 = y1s, let x2 = x2s, let y2 = y2s {
-            if let piece = tdj.searchPiecePosition(coordX : x1, coordY : y1) {
-                if (tdj.validerCapture(Piece : piece, neufX : x2, neufY : y2)){
-                    tdj.capturerPiece(Piece : piece, neufX : x2, neufY : y2)
+            if let piece = tdj.searchPiecePosition(x1, y1) {
+                if (tdj.validerCapture(piece, x2, y2)){
+                    tdj.capturerPiece(piece, x2, y2)
                 }
                 else {
                     return false
@@ -92,20 +93,20 @@ func parseCommandeJoueur(tdj : tableDeJeu, joueur: Joueur, cmd : String) -> Bool
         else {
             return false
         }
-        
+
 
 
     case "parachuter" :
         let noms : String? = cmda[1]
         let xs : Int? = Int(cmda[2])
         let ys : Int? = Int(cmda[3])
-        
+
         if let x = xs, let y = ys, let nom = noms {
-            
-            if(joueur == tdj.joueur1){
-                if let piece = tdj.reserve1.searchPieceNom(nom) {
+
+            if(joueur.nombre == tdj.joueur1.nombre){
+                if let piece = tdj.reserve1.searchPieceNom(nom: nom, joueur: joueur) {
                     do{
-                        try tdj.parachuter(piece : piece , neufX : x, neufY : y)
+                        try tdj.parachuter(piece , x, y)
                     } catch {
                         return false
                     }
@@ -115,9 +116,9 @@ func parseCommandeJoueur(tdj : tableDeJeu, joueur: Joueur, cmd : String) -> Bool
                 }
             }
             else {
-                if let piece = tdj.reserve2.searchPieceNom(nom) {
+                if let piece = tdj.reserve2.searchPieceNom(nom: nom, joueur: joueur) {
                     do{
-                        try tdj.parachuter(piece : piece , neufX : x, neufY : y)
+                        try tdj.parachuter(piece , x, y)
                     } catch {
                         return false
                     }
@@ -127,31 +128,32 @@ func parseCommandeJoueur(tdj : tableDeJeu, joueur: Joueur, cmd : String) -> Bool
                 }
             }
         }
-        
+
         else {
             return false
         }
-    
+
     default :
         return false
     }
+    return false
 }
 
-// La partie principale : 
+// La partie principale :
 
-var tdj = tableDeJeu()
+var tdj = TableDeJeu()
 
-// La boucle principale : 
+// La boucle principale :
 while(true){
     var cmd : String?;
-    var cmd2 : String;
+    //let cmd2 : String;
 
     // Pour joueur 1
     while(true) {
         print("Ecrivez votre action : ")
         cmd = readLine()
-		if let cmd2 = cmd {
-			if(parseCommandeJoueur(tdj : tdj, joueur: tdj.j1, cmd : cmd)) {
+		if cmd != nil {
+			if(parseCommandeJoueur(tdj : &tdj, joueur: Joueur(nombre: tdj.joueur1.nombre), cmd : cmd!)) {
 				break;
 			}
             else {
@@ -161,7 +163,7 @@ while(true){
 
     }
 
-    if (tdj.gagnerPartie(tdj.j1)){
+    if (tdj.gagnerPartie(tdj.joueur1)){
         print("Joueur 1 a gagne ! ")
         break;
     }
@@ -170,8 +172,8 @@ while(true){
     while(true) {
         print("Ecrivez votre action : ")
         cmd = readLine()
-		if let cmd2 = cmd {
-			if(parseCommandeJoueur(tdj : tdj, joueur: tdj.j2, cmd : cmd)) {
+		if cmd != nil {
+			if(parseCommandeJoueur(tdj : &tdj, joueur: Joueur(nombre: tdj.joueur2.nombre), cmd : cmd!)) {
 				break;
 			}
             else {
@@ -181,7 +183,7 @@ while(true){
 
     }
 
-    if ( tdj.gagnerPartie(tdj.j2)){
+    if ( tdj.gagnerPartie(tdj.joueur2)){
         print("Joueur 2 a gagne ! ")
         break;
     }
