@@ -41,7 +41,7 @@ func afficheTableCourante(tdj : TableDeJeu) {
 // une fonction qui parse et execute la commande pris, en appelant les fonctions necessaires pour
 // l’executer.
 // Pre : aucune
-// Post : Retourne true si l’action est valide, false sinon
+// Post     print (self.tab): Retourne true si l’action est valide, false sinon
 func parseCommandeJoueur(tdj : inout TableDeJeu, joueur: Joueur, cmd : String) -> Bool {
 
     // cmda = array de mots dans cmd (‘deplacer 1 2 3 4’ devient [‘deplacer’ , ‘1‘, ’2’ , ‘3’, ‘4’ ])
@@ -56,6 +56,7 @@ func parseCommandeJoueur(tdj : inout TableDeJeu, joueur: Joueur, cmd : String) -
 
         if let x1 = x1s, let y1 = y1s, let x2 = x2s, let y2 = y2s {
             if let piece = tdj.searchPiecePosition(x1, y1) {
+
                 if (tdj.validerDeplacement(piece, x2, y2)){
                     tdj.deplacerPiece(piece, x2, y2)
                 }
