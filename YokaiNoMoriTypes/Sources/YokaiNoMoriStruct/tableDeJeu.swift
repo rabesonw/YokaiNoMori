@@ -9,6 +9,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
 
   private enum TDJError: Error {
     case initPiece
+    case kodamaNotInTDJ
   }
 
   private var tab : [[pieceProtocol?]]
@@ -163,7 +164,10 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	//		renvoie False sinon.
 	public func validerCapture(_ Piece : pieceProtocol, _ neufX : Int, _ neufY : Int) -> Bool {
 		var colpo = self.positionsPossibles(Piece)
-		if neufX < 1 || neufY < 1 || neufX > 3 || neufY > 4 || self.tab[neufX-1][neufY-1].joueur.nombre == Piece.joueur.nombre {
+    guard let p = self.tab[neufX-1][neufY-1] else {
+      return false
+    }
+		if neufX < 1 || neufY < 1 || neufX > 3 || neufY > 4 || p.joueur.nombre == Piece.joueur.nombre {
 			return false
 		} else {
 			for pos in colpo {
@@ -188,14 +192,17 @@ public struct TableDeJeu : tableDeJeuProtocol {
     if self.validerDeplacement(Piece, neufX, neufY) {
 
       // Deplacement de la piece
-      self.tab[Piece.coordX-1][Piece.coordY-1] = nil
-      Piece.coordX = neufX
-      Piece.coordY = neufY
-      self.tab[neufX-1][neufY-1] = Piece
+      var p = self.tab[Piece.coordX-1][Piece.coordY-1]!
+      self.tab[p.coordX-1][p.coordY-1] = nil
+      p.coordX = neufX
+      p.coordY = neufY
+      self.tab[neufX-1][neufY-1] = p
 
       // Verif promotion
-      if Piece.nom == "kodama" && Piece.estEnPromotion() {
-        self = self.transformerKodama(Piece)
+      if p.nom == "kodama" && p.estEnPromotion() {
+        do {
+          try self.transformerKodama(p)
+        } catch {}
       }
     }
 
@@ -211,19 +218,22 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	public mutating func capturerPiece(_ pieceAttaquante : pieceProtocol, _ neufX : Int, _ neufY : Int) -> tableDeJeuProtocol {
 
     if (self.validerCapture(pieceAttaquante, neufX, neufY)) {
-      var pieceAttaquee = self.tab[neufX-1][neufY-1];
+      var pieceAttaquee = self.tab[neufX-1][neufY-1]!;
 
       // transforme
-      if (pieceAttaquee.nom = "kodama samurai") {
-        self = self.tranformerKodama(pieceAttaquee)
-        pieceAttaquee = self.tab[neufX-1][neufY-1];
+      if (pieceAttaquee.nom == "kodama samurai") {
+        do {
+          try self.transformerKodama(pieceAttaquee)
+        } catch{}
+
+        pieceAttaquee = self.tab[neufX-1][neufY-1]!;
       }
 
       // Ajoute la piece attaquee a la reserve
       self.mettreEnReserve(pieceAttaquee)
 
       // Deplacement de la piece
-      self = self.deplacerPiece(pieceAttaquante, neufX, neufY)
+      self.deplacerPiece(pieceAttaquante, neufX, neufY)
     }
 
     return self
@@ -240,11 +250,21 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	//        ou c'est un kodama dans la reserve de l'attaquant
 	@discardableResult
 	public mutating func transformerKodama(_ piece : pieceProtocol) throws -> tableDeJeuProtocol {
-		if piece.nom == "kodama" && self.estSurPlateau(piece) {
-			piece.nom = "kodama samurai"
-		} else if piece.nom == "kodama samurai" && !self.estSurPlateau(piece) {
-			piece.nom = "kodama"
-		}
+    let piece = self.tab[piece.coordX-1][piece.coordY-1]
+    if piece != nil {
+      var p = piece!
+  		if p.nom == "kodama" {
+  			p.nom = "kodama samurai"
+  		} else if p.nom == "kodama samurai" {
+  			p.nom = "kodama"
+  		}
+
+      self.tab[p.coordX-1][p.coordY-1] = p
+
+    } else {
+      throw TDJError.kodamaNotInTDJ
+    }
+
   }
 
     // mettreEnReserve : tableDeJeu x Piece -> tableDeJeu
@@ -253,13 +273,15 @@ public struct TableDeJeu : tableDeJeuProtocol {
     // Post : la Piece est en reserve et son joueur est changé
 	@discardableResult
 	public mutating func mettreEnReserve(_ piece : pieceProtocol) -> tableDeJeuProtocol {
-    if (self.estSurPlateau(piece)) {
-      if (piece.joueur.nombre == self.joueur1.nombre) {
-        piece.joueur.nombre = self.joueur2.nombre
-        self.reserve2.ajoutePiece(piece)
+    var p = piece
+
+    if (self.estSurPlateau(p)) {
+      if (p.joueur.nombre == self.joueur1.nombre) {
+        p.joueur = self.joueur2
+        self.r2.ajoutePiece(piece: p)
       } else {
-        piece.joueur.nombre = self.joueur1.nombre
-        self.reserve1.ajoutePiece(piece)
+        p.joueur = self.joueur1
+        self.r1.ajoutePiece(piece: p)
       }
     }
     return self
@@ -278,10 +300,10 @@ public struct TableDeJeu : tableDeJeuProtocol {
       if piece.joueur.nombre == self.joueur1.nombre {
 
         // Si la piece est dans la reserve
-        if let p = self.reserve1.searchPieceNom(piece.nom, piece.joueur) {
+        if self.reserve1.searchPieceNom(nom: piece.nom, joueur: piece.joueur) != nil{
           // Retire la piece
           do {
-            try self.reserve1.enlevePiece(piece.nom)
+            try self.r1.enlevePiece(nomPiece: piece.nom)
           } catch {}
 
           // Ajout a la tdj
@@ -291,10 +313,10 @@ public struct TableDeJeu : tableDeJeuProtocol {
       } else {
 
         // Si la piece est dans la reserve
-        if let p = self.reserve2.searchPieceNom(piece.nom, piece.joueur) {
+        if self.reserve2.searchPieceNom(nom: piece.nom, joueur: piece.joueur) != nil {
           // Retire la piece
           do {
-            try self.reserve2.enlevePiece(piece.nom)
+            try self.r2.enlevePiece(nomPiece: piece.nom)
           } catch {}
 
           // Ajout a la tdj
@@ -311,20 +333,24 @@ public struct TableDeJeu : tableDeJeuProtocol {
   public func gagnerPartie(_ joueur : joueurProtocol) -> Bool {
 		if joueur.nombre == self.joueur1.nombre {
 			for i in 0...2 {
-				if tab[i][3].nom == "koropokkuru" || tab[i][3].joueur == joueur {
-					return true
-				}
+        if let p = tab[i][3] {
+  				if p.nom == "koropokkuru" || p.joueur.nombre == joueur.nombre {
+  					return true
+  				}
+        }
 			}
-			for piece in self.reserve1 {
+      for piece in self.reserve1 {
 				if piece.nom == "koropokkuru" {
 					return true
 				}
 			}
 		} else {
 			for i in 0...2 {
-				if tab[i][0].nom == "koropokkuru" || tab[i][0].joueur == joueur {
-					return true
-				}
+        if let p = tab[i][0] {
+  				if p.nom == "koropokkuru" || p.joueur.nombre == joueur.nombre {
+  					return true
+  				}
+        }
 			}
 			for piece in self.reserve2 {
 				if piece.nom == "koropokkuru" {
@@ -338,7 +364,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	// makeIterator : tableDeJeuProtocol -> tableDeJeuIterateurProtocol
     // crée un itérateur sur le collection pour itérer avec for in.
   public func makeIterator() -> TableDeJeuIterateur {
-		return TableDeJeuIterator(self)
+		return TableDeJeuIterateur(self)
   }
 
   // Retourne vrai si la piece fait partie du plateau
@@ -346,7 +372,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
     for ligne in self.tab {
       for c in ligne {
         if let p = c {
-          if p == piece {
+          if p.nom == piece.nom && p.coordX == piece.coordX && p.coordY == piece.coordY && p.joueur.nombre == piece.joueur.nombre {
             return true
           }
         }
@@ -379,7 +405,7 @@ public struct TableDeJeuIterateur : tableDeJeuIterateurProtocol {
     // Pre : aucune
     // Post : retourne la piece suivante dans la collection du tableDeJeu, ou nil si on est au fin de la collection
 
-	public func next() -> pieceProtocol? {
+	public mutating func next() -> pieceProtocol? {
     while self.y>=4 && self.tdj.estVide(x+1, y+1) {
       self.incrementer()
     }
@@ -390,7 +416,7 @@ public struct TableDeJeuIterateur : tableDeJeuIterateurProtocol {
 
     else {
       if !self.tdj.estVide(x+1, y+1) {
-        var piece = self.tdj.searchPiecePosition(x+1, y+1)
+        let piece = self.tdj.searchPiecePosition(x+1, y+1)
         self.incrementer()
         return piece
       } else {
@@ -400,7 +426,7 @@ public struct TableDeJeuIterateur : tableDeJeuIterateurProtocol {
   }
 
   // Passe a la case suivante
-  private func incrementer () {
+  private mutating func incrementer () {
     self.x = self.x + 1
     if self.x >= 3 {
       self.x = 0

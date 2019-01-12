@@ -123,6 +123,6 @@ public protocol tableDeJeuIterateurProtocol : IteratorProtocol {
     // Pre : aucune
     // Post : retourne la piece suivante dans la collection du tableDeJeu, ou nil si on est au fin de la collection
 
-	func next() -> Piece?
+	mutating func next() -> Piece?
 
 }
