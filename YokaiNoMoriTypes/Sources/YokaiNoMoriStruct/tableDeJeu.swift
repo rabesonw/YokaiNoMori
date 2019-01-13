@@ -208,6 +208,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
       self.mettreEnReserve(pieceAttaquee)
 
       // Deplacement de la piece
+      self.tab[neufX-1][neufY-1] = nil
       self.deplacerPiece(pieceAttaquante, neufX, neufY)
     }
 
