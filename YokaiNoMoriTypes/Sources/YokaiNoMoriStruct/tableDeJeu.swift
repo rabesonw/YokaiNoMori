@@ -9,6 +9,9 @@ public struct TableDeJeu : tableDeJeuProtocol {
   private enum TDJError: Error {
     case initPiece
     case kodamaNotInTDJ
+    case NotAKodama
+    case kodamaNotEnPromotion
+    case PieceNotInReserve
   }
 
   private var tab : [[pieceProtocol?]]
@@ -84,50 +87,20 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	// positionsPossibles : tableDeJeu x Piece -> CollectionPositions
 	// evaluation des toutes les futurs positions disponibles pour une pièce
 	public func positionsPossibles<CP: collectionPositionsProtocol>(_ piece: pieceProtocol) -> CP {
-		var colpo = CP()
-		if piece.nom == "tanuki" {
-			colpo.addPosition(x: piece.coordX+1, y: piece.coordY)
-			colpo.addPosition(x: piece.coordX-1, y: piece.coordY)
-			colpo.addPosition(x: piece.coordX, y: piece.coordY+1)
-			colpo.addPosition(x: piece.coordX, y: piece.coordY-1)
-		} else if piece.nom == "koropokkuru" {
-			colpo.addPosition(x: piece.coordX+1, y: piece.coordY)
-			colpo.addPosition(x: piece.coordX-1, y: piece.coordY)
-			colpo.addPosition(x: piece.coordX, y: piece.coordY+1)
-			colpo.addPosition(x: piece.coordX, y: piece.coordY-1)
-			colpo.addPosition(x: piece.coordX+1, y: piece.coordY+1)
-			colpo.addPosition(x: piece.coordX+1, y: piece.coordY-1)
-			colpo.addPosition(x: piece.coordX-1, y: piece.coordY+1)
-			colpo.addPosition(x: piece.coordX-1, y: piece.coordY-1)
-		} else if piece.nom == "kitsune" {
-			colpo.addPosition(x: piece.coordX+1, y: piece.coordY+1)
-			colpo.addPosition(x: piece.coordX+1, y: piece.coordY-1)
-			colpo.addPosition(x: piece.coordX-1, y: piece.coordY+1)
-			colpo.addPosition(x: piece.coordX-1, y: piece.coordY-1)
-		}
-		if piece.joueur.nombre == self.joueur1.nombre {
-			if piece.nom == "kodama" {
-				colpo.addPosition(x: piece.coordX, y: piece.coordY+1)
-			} else if piece.nom == "kodama samurai" {
-				colpo.addPosition(x: piece.coordX, y: piece.coordY-1)
-				colpo.addPosition(x: piece.coordX, y: piece.coordY+1)
-				colpo.addPosition(x: piece.coordX+1, y: piece.coordY)
-				colpo.addPosition(x: piece.coordX-1, y: piece.coordY)
-				colpo.addPosition(x: piece.coordX+1, y: piece.coordY+1)
-				colpo.addPosition(x: piece.coordX-1, y: piece.coordY+1)
-			}
-		} else if piece.joueur.nombre == self.joueur2.nombre {
-			if piece.nom == "kodama" {
-				colpo.addPosition(x: piece.coordX, y: piece.coordY-1)
-			} else if piece.nom == "kodama samurai" {
-				colpo.addPosition(x: piece.coordX, y: piece.coordY-1)
-				colpo.addPosition(x: piece.coordX, y: piece.coordY+1)
-				colpo.addPosition(x: piece.coordX+1, y: piece.coordY)
-				colpo.addPosition(x: piece.coordX-1, y: piece.coordY)
-				colpo.addPosition(x: piece.coordX+1, y: piece.coordY-1)
-				colpo.addPosition(x: piece.coordX-1, y: piece.coordY-1)
-			}
-		}
+    let cp = self.deplacementsPossibles(piece)
+    var colpo : CP = CP()
+    // Verification de la validite du deplacment
+    for deplacement in cp {
+
+      // Si le deplacement ne s'effectue pas hors des limites du plateau
+      if !(deplacement.0 < 1 || deplacement.1 < 1 || deplacement.0 > 3 || deplacement.1 > 4) {
+
+        // Si la case du deplacment est vide
+        if (self.tab[deplacement.0-1][deplacement.1-1] == nil) {
+          colpo.addPosition(x: deplacement.0, y: deplacement.1)
+        }
+      }
+    }
     return colpo
   }
 
@@ -145,7 +118,7 @@ public struct TableDeJeu : tableDeJeuProtocol {
 			return false
 		} else {
 			for pos in colpo {
-				if (neufX, neufY) == pos {
+        if neufX == pos.0 && neufY == pos.1 {
 					return true
 				}
 			}
@@ -163,10 +136,12 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	//		1 <= x <= 3 et 1 <= y <=4.
 	//		renvoie False sinon.
 	public func validerCapture(_ Piece : pieceProtocol, _ neufX : Int, _ neufY : Int) -> Bool {
-		let colpo : CP  = self.positionsPossibles(Piece)
+		let colpo : CP  = self.deplacementsPossibles(Piece)
+
     guard let p = self.tab[neufX-1][neufY-1] else {
       return false
     }
+
 		if neufX < 1 || neufY < 1 || neufX > 3 || neufY > 4 || p.joueur.nombre == Piece.joueur.nombre {
 			return false
 		} else {
@@ -191,7 +166,6 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	public mutating func deplacerPiece(_ Piece: pieceProtocol, _ neufX : Int, _ neufY : Int) -> TableDeJeu {
 
     if self.validerDeplacement(Piece, neufX, neufY) {
-
       // Deplacement de la piece
       var p = self.tab[Piece.coordX-1][Piece.coordY-1]!
       self.tab[p.coordX-1][p.coordY-1] = nil
@@ -251,19 +225,25 @@ public struct TableDeJeu : tableDeJeuProtocol {
 	//        ou c'est un kodama dans la reserve de l'attaquant
 	@discardableResult
 	public mutating func transformerKodama(_ piece : pieceProtocol) throws -> TableDeJeu {
-    let piece = self.tab[piece.coordX-1][piece.coordY-1]
-    if piece != nil {
-      var p = piece!
-  		if p.nom == "kodama" {
-  			p.nom = "kodama samurai"
-  		} else if p.nom == "kodama samurai" {
-  			p.nom = "kodama"
-  		}
-
-      self.tab[p.coordX-1][p.coordY-1] = p
-
+    if (piece.nom != "kodama" && piece.nom != "kodama samurai") {
+      throw TDJError.NotAKodama
     } else {
-      throw TDJError.kodamaNotInTDJ
+      if self.tab[piece.coordX-1][piece.coordY-1] != nil {
+        var p = piece
+
+        if !p.estEnPromotion() {
+          throw TDJError.kodamaNotEnPromotion
+        } else {
+      		if p.nom == "kodama" {
+      			p.nom = "kodama samurai"
+      		} else if p.nom == "kodama samurai" {
+      			p.nom = "kodama"
+      		}
+          self.tab[p.coordX-1][p.coordY-1] = p
+        }
+      } else {
+        throw TDJError.kodamaNotInTDJ
+      }
     }
     return self
 
@@ -310,6 +290,8 @@ public struct TableDeJeu : tableDeJeuProtocol {
 
           // Ajout a la tdj
           self.tab[neufX-1][neufY-1] = piece
+        } else {
+            throw TDJError.PieceNotInReserve
         }
         // Joueur 2
       } else {
@@ -323,6 +305,9 @@ public struct TableDeJeu : tableDeJeuProtocol {
 
           // Ajout a la tdj
           self.tab[neufX-1][neufY-1] = piece
+
+        } else {
+            throw TDJError.PieceNotInReserve
         }
       }
     }
@@ -336,8 +321,8 @@ public struct TableDeJeu : tableDeJeuProtocol {
   public func gagnerPartie(_ joueur : joueurProtocol) -> Bool {
 		if joueur.nombre == self.joueur1.nombre {
 			for i in 0...2 {
-        if let p = tab[i][3] {
-  				if p.nom == "koropokkuru" || p.joueur.nombre == joueur.nombre {
+        if let p = self.tab[i][3] {
+  				if p.nom == "koropokkuru" && p.joueur.nombre == joueur.nombre {
   					return true
   				}
         }
@@ -349,8 +334,8 @@ public struct TableDeJeu : tableDeJeuProtocol {
 			}
 		} else {
 			for i in 0...2 {
-        if let p = tab[i][0] {
-  				if p.nom == "koropokkuru" || p.joueur.nombre == joueur.nombre {
+        if let p = self.tab[i][0] {
+  				if p.nom == "koropokkuru" && p.joueur.nombre == joueur.nombre {
   					return true
   				}
         }
@@ -387,6 +372,56 @@ public struct TableDeJeu : tableDeJeuProtocol {
   // Retourne vrai si la case est vide
   public func estVide(_ x: Int, _ y: Int) -> Bool {
     return self.tab[x-1][y-1] == nil
+  }
+
+  // Renvoie une collection de positions pour tous les deplacements possibles de la piece
+  // Sans prendre en compte les obstacles et les limites du plateau
+  private func deplacementsPossibles(_ piece: pieceProtocol) -> CP {
+    var colpo = CP()
+    if piece.nom == "tanuki" {
+      colpo.addPosition(x: piece.coordX+1, y: piece.coordY)
+      colpo.addPosition(x: piece.coordX-1, y: piece.coordY)
+      colpo.addPosition(x: piece.coordX, y: piece.coordY+1)
+      colpo.addPosition(x: piece.coordX, y: piece.coordY-1)
+    } else if piece.nom == "koropokkuru" {
+      colpo.addPosition(x: piece.coordX+1, y: piece.coordY)
+      colpo.addPosition(x: piece.coordX-1, y: piece.coordY)
+      colpo.addPosition(x: piece.coordX, y: piece.coordY+1)
+      colpo.addPosition(x: piece.coordX, y: piece.coordY-1)
+      colpo.addPosition(x: piece.coordX+1, y: piece.coordY+1)
+      colpo.addPosition(x: piece.coordX+1, y: piece.coordY-1)
+      colpo.addPosition(x: piece.coordX-1, y: piece.coordY+1)
+      colpo.addPosition(x: piece.coordX-1, y: piece.coordY-1)
+    } else if piece.nom == "kitsune" {
+      colpo.addPosition(x: piece.coordX+1, y: piece.coordY+1)
+      colpo.addPosition(x: piece.coordX+1, y: piece.coordY-1)
+      colpo.addPosition(x: piece.coordX-1, y: piece.coordY+1)
+      colpo.addPosition(x: piece.coordX-1, y: piece.coordY-1)
+    }
+    if piece.joueur.nombre == self.joueur1.nombre {
+      if piece.nom == "kodama" {
+        colpo.addPosition(x: piece.coordX, y: piece.coordY+1)
+      } else if piece.nom == "kodama samurai" {
+        colpo.addPosition(x: piece.coordX, y: piece.coordY-1)
+        colpo.addPosition(x: piece.coordX, y: piece.coordY+1)
+        colpo.addPosition(x: piece.coordX+1, y: piece.coordY)
+        colpo.addPosition(x: piece.coordX-1, y: piece.coordY)
+        colpo.addPosition(x: piece.coordX+1, y: piece.coordY+1)
+        colpo.addPosition(x: piece.coordX-1, y: piece.coordY+1)
+      }
+    } else if piece.joueur.nombre == self.joueur2.nombre {
+      if piece.nom == "kodama" {
+        colpo.addPosition(x: piece.coordX, y: piece.coordY-1)
+      } else if piece.nom == "kodama samurai" {
+        colpo.addPosition(x: piece.coordX, y: piece.coordY-1)
+        colpo.addPosition(x: piece.coordX, y: piece.coordY+1)
+        colpo.addPosition(x: piece.coordX+1, y: piece.coordY)
+        colpo.addPosition(x: piece.coordX-1, y: piece.coordY)
+        colpo.addPosition(x: piece.coordX+1, y: piece.coordY-1)
+        colpo.addPosition(x: piece.coordX-1, y: piece.coordY-1)
+      }
+    }
+    return colpo
   }
 
 }

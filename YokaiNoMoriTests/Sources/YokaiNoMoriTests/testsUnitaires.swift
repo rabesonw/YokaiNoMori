@@ -50,7 +50,6 @@ func verifPositionsPossibles() -> Int {
     var tdj  = TableDeJeu()
     var pc = tdj.searchPiecePosition(1, 1) // tanuki de j1
     var cpp : CP = tdj.positionsPossibles(pc!)
-
     if (cpp.countPositions() == 0) {
         print("Il y a des positions que vous n’avez pas trouve.")
     }
@@ -130,18 +129,22 @@ func verifDeplacerPiece() -> Int {
     var ret  : Int = 0
 
     var tdj2 = tdj.deplacerPiece(pc!, 1 , 2)
+
     var tdj3 = tdj.deplacerPiece(pc!, 2 , 1)
 
-    // TODO Changer car comparaison comme ca ne marche pas
-    // if(tdj2 == tdj){
-    //     print("Mal defini pour deplacements valides")
-    //     ret = ret + 1
-    // }
-    //
-    // if(tdj3 != tdj){
-    //     print("Mal defini pour deplacements invalides")
-    //     ret = ret + 1
-    // }
+    if let p = tdj2.searchPiecePosition(1,1) {
+      print("Mal defini pour deplacements valides")
+      ret = ret + 1
+    } else {
+
+    }
+
+    if let p2 = tdj3.searchPiecePosition(1,2) {
+
+    } else {
+        print("Mal defini pour deplacements invalides")
+        ret = ret + 1
+    }
 
     return ret
 }
@@ -162,12 +165,13 @@ func verifCapturerPiece() -> Int {
 
     //cas piece ennemie
     piece = tdj.searchPiecePosition(2, 2) // kodama de j1
-	if (tdj.validerCapture(piece!,3,2)){
+	if (tdj.validerCapture(piece!,2,3)){
         print("Bien definie : on peut capturer un ennemi.")
-        ret = ret + 1
+
 	}
 	else {
-	print("Mal definie : on peut capturer un ennemi.")
+	   print("Mal definie : on peut capturer un ennemi.")
+     ret = ret + 1
 	}
     return ret
 }
@@ -204,6 +208,7 @@ func verifTransformerKodama() -> Int {
     }
 
     pc = tdj.searchPiecePosition(2, 2)
+
     do{
         try tdj.transformerKodama(pc!)
         print("[transformerKodama] On ne peut pas transformer une kodama qui n'est pas dans la zone de promotion. Mal definie.")
@@ -217,10 +222,12 @@ func verifTransformerKodama() -> Int {
 	do{
         try tdj.transformerKodama(pc!)
         print("[transformerKodama] Bien definie: un kodama en zone de promotion est bien transforme")
-        ret = ret + 1
+
     }
     catch{
+      print ("\(error)")
         print("[transformerKodama] Mal definie : un kodama en zone de promotion doit pouvoir etre transforme.")
+        ret = ret + 1
     }
 
     return ret
@@ -233,12 +240,12 @@ func verifParachuter() -> Int {
 
     var ret  : Int = 0
     var tdj = TableDeJeu()
-    var pc = tdj.reserve1.searchPieceNom(nom: "kodama",joueur: tdj.joueur1)
+
 
     // maintenant il n’y a rien dans la réserve, c'est l'etat initiel
     do{
-        //TODO : Mauvais types pour les parametres
-        //try tdj.parachuter("kodama", tdj.joueur1, 1, 2)
+        let p = try Piece(nom: "kodama", coordX: 1, coordY: 1, joueur: tdj.joueur1)
+        try tdj.parachuter(p!, 1, 2)
         print("[parachuter] On ne peut pas parachuter un element sans qu’il ne soit dans la reserve, meme si la case est vide.")
         ret = ret + 1
     }
@@ -270,11 +277,14 @@ func verifEstEnPromotion() -> Int {
 /////////////////////////// --- Tests reserveProtocol --- //////////////////////////////////////
 
 //on test ajouterPiece, et searchPiecePosition doit aussi marcher
+
+// CHECKME ERREUR DE SPECS : Reserve est un getOnly property : Changer les specs, on ne peut pas ajouter a la reserve depuis l'exterieur de la tdj
 func verifAjouterPiece() -> Int {
 	var ret  : Int = 0
 	var tdj = TableDeJeu()
 	var pc = tdj.searchPiecePosition(2 , 2)
-  // TODO Erreur : Reserve est un getOnly property : Changer les specs
+
+
 	//tdj.reserve2.ajoutePiece(pc)
 	// if let pc = tdj.reserve2.searPieceNom("kodama"){
 	// 	print("[ajouterPiece] Bien definie, la piece a ete mise en reserve")
